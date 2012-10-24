@@ -98,6 +98,25 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 		begin
 			ALUResult <= A << (B[10:6]);
 		end
+		else if (ALUControl == 11) // SGT - Set Greater Than
+		begin
+			if (A[31] != B[31]) begin
+				if (A[31] > B[31]) begin
+					ALUResult <= 0;
+				end else begin
+					ALUResult <= 1;
+				end
+			end else begin
+				if (A < B)
+				begin
+					ALUResult <= 0;
+				end
+				else
+				begin
+					ALUResult <= 1;
+				end
+			end
+		end
 
 
 

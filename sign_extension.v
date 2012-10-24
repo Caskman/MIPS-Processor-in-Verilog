@@ -15,6 +15,7 @@ module sign_extension(out, in,ExtendSign);
     
     /* A 16-Bit input word */
     input   [15:0] in;
+	 input ExtendSign;
 	 reg [31:0] out;
 	 reg [15:0] A;
 	 reg [31:0] B;
