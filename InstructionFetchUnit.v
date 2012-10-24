@@ -1,0 +1,62 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// ECE369 - Computer Architecture
+// Laboratory 3 (PostLab)
+// Module - InstructionFetchUnit.v
+// Description - Fetches the instruction from the instruction memory based on 
+//               the program counter (PC) value.
+// INPUTS:-
+// Reset: 1-Bit input signal. 
+// Clk: Input clock signal.
+//
+// OUTPUTS:-
+// Instruction: 32-Bit output instruction from the instruction memory.
+//
+// FUNCTIONALITY:-
+// Please connect up the following implemented modules to create this
+// 'InstructionFetchUnit':-
+//   (a) ProgramCounter.v
+//   (b) PCAdder.v
+//   (c) InstructionMemory.v
+// Connect the modules together in a testbench so that the instruction memory
+// outputs the contents of the next instruction indicated by the memory location
+// in the PC at every clock cycle. Please initialize the instruction memory with
+// some preliminary values for debugging purposes.
+//
+// @@ The 'Reset' input control signal is connected to the program counter (PC) 
+// register which initializes the unit to output the first instruction in 
+// instruction memory.
+// @@ The 'Instruction' output port holds the output value from the instruction
+// memory module.
+// @@ The 'Clk' input signal is connected to the program counter (PC) register 
+// which generates a continuous clock pulse into the module.
+////////////////////////////////////////////////////////////////////////////////
+
+module InstructionFetchUnit(Instruction, Reset, Clk,InstructOffset,Branch,JumpInstruction,Jump);
+
+    /* Please fill in the implementation here... */
+	 wire [31:0] PCAdderOut,PCNext,Instruction,ALUResult,PCOut,PCNextBJ;
+	 wire Zero;
+	 wire [3:0] ALUControl;
+	 input Reset,Clk,Branch,Jump;
+	 input [31:0] InstructOffset;
+	 input [25:0] JumpInstruction;
+	 wire [31:0] JumpIn;
+	 
+	 output [31:0] Instruction;
+	 
+	 
+	 PCAdder adder(PCOut,PCAdderOut);
+	 
+	 ProgramCounter PC(PCNext,PCOut,Reset,Clk);
+	 
+	 InstructionMemory mem(PCOut,Instruction);
+	 mux_2to1_32bit PCNextOrBranchMux(PCNextBJ,PCAdderOut,ALUResult,Branch);
+	 mux_2to1_32bit jump(PCNext,PCNextBJ,JumpIn,Jump); // ask Yoon about how to concatenate bits
+	 ALU32Bit OffsetCalc(4'h2,PCOut,(InstructOffset<<2),ALUResult,Zero);
+	 
+	 assign JumpIn = (JumpInstruction<<2);
+
+endmodule
+
