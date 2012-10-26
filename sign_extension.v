@@ -23,7 +23,7 @@ module sign_extension(out, in,ExtendSign);
     /* Fill in the implementation here... */ 
     always@(in)
 	 begin
-		if (ExtendSign == 1) begin
+		if (ExtendSign == 0) begin
 			out <= in;
 		end else begin
 			if ((in & 16'h8000) == 16'h8000)
