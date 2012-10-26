@@ -4,32 +4,30 @@ module Controller(Clk);
 	
 	input Clk;
 	wire  [31:0]  WriteDataToMem,Instruction,WriteDataToReg,ReadData1,MemToRegData,NextInstruct;
-	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
+	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA,JumpAddress;
 	reg Reset,RegWrite,RegDataSel;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
 	reg [1:0] ALUBSrc,RegDst;
-	reg [31:0] HardZero,HardOne;
 	reg MemtoReg,MemWrite,MemRead,ALUASrc,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
-	reg BranchBLTZ_BGTZ,BranchBGEZ;
+	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal;
 	
 	initial begin
 		Reset <= 0;
-		HardZero <= 0;
-		HardOne <= 1;
 	end
 
-	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,Instruction[25:0],Jump,NextInstruct);
+	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,JumpAddress,Jump,NextInstruct);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWrite,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult, Zero);
 	DataMemory DMem(ALUResult, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_2to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,ALUASrc);
-	mux_4to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,HardZero,HardOne,ALUBSrc);
+	mux_4to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,ALUBSrc);
 	sign_extension InstExtend(Extended15to0Inst,Instruction[15:0],ExtendSign);
 	mux_2to1_32bit RegWriteDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
+	mux_2to1_32bit JumpSelMux(JumpAddress,Instruction[25:0],ReadRegister1,JumpSel);
 
 	assign ReadRegister1 = Instruction[25:21];// rs
 	assign ReadRegister2 = Instruction[20:16];// rt
@@ -60,73 +58,79 @@ module Controller(Clk);
 //			BranchBLTZ_BGTZ <= 0;
 //			BranchBGEZ <= 0;
 //			RegDataSel <= 0;
+//			JumpSel <= 0;
 
 
 		if (Instruction != 0) begin
 			case (Instruction[31:26]) 
-				0: begin // R-type
+				0: begin // R-type or SPECIAL
 					case (Instruction[5:0]) 
-					 32: begin
-						 ALUControl <= 2;
-						 RegWrite <= 1;
-						ALUBSrc <= 0;
-						ALUASrc <= 0;
-						$display("ADD");
+						32: begin // ADD
+							ALUControl <= 2;
+							RegWrite <= 1;
+							ALUBSrc <= 0;
+							ALUASrc <= 0;
+							Jump <= 0;
 						end
-					 33: begin // ADDU
-						 ALUControl <= 2;
-						 RegWrite <= 1;
-						ALUBSrc <= 0;
-						ALUASrc <= 0;
-					 end
-					 36:begin
-						 ALUControl <= 0;
-						 RegWrite <= 1;
-						ALUASrc <= 0;
-					ALUBSrc <= 0;
-					$display("AND");
+						33: begin // ADDU
+							ALUControl <= 2;
+							RegWrite <= 1;
+							ALUBSrc <= 0;
+							ALUASrc <= 0;
+							Jump <= 0;
 						end
-					 37: begin
-						 ALUControl <= 1;
-						 RegWrite <= 1;
-						ALUASrc <= 0;
-					ALUBSrc <= 0;
-					$display("OR");
+						36:begin // AND
+							ALUControl <= 0;
+							RegWrite <= 1;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							Jump <= 0;
 						end
-					 34:begin
-						 ALUControl <= 6;
-						 RegWrite <= 1;
-						ALUASrc <= 0;
-					ALUBSrc <= 0;
-					$display("SUB");
+						37: begin // OR
+							ALUControl <= 1;
+							RegWrite <= 1;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							Jump <= 0;
 						end
-					 42:begin
-						 ALUControl <= 7;
-						 RegWrite <= 1;
-						ALUASrc <= 0;
-					ALUBSrc <= 0;
-					$display("SLT");
+						34:begin // SUB
+							ALUControl <= 6;
+							RegWrite <= 1;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							Jump <= 0;
 						end
-					 39: begin
-						 ALUControl <= 3;
-						 RegWrite <= 1;
-						ALUASrc <= 0;
-					ALUBSrc <= 0;
-					$display("NOR");
+						42:begin // SLT
+							ALUControl <= 7;
+							RegWrite <= 1;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							Jump <= 0;
 						end
-					 0: begin // SLL
-						ALUControl <= 10;
-						RegWrite <= 1;
-						ALUBSrc <= 1;
-						ALUASrc <= 1;
-					 end
-						
-						
-					default:
-						 RegWrite <= 0;
+						39: begin // NOR
+							ALUControl <= 3;
+							RegWrite <= 1;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							Jump <= 0;
+						end
+						0: begin // SLL
+							ALUControl <= 10;
+							RegWrite <= 1;
+							ALUBSrc <= 1;
+							ALUASrc <= 1;
+							Jump <= 0;
+						end
+						8: begin // JR
+							Jump <= 1;
+							JumpSel <= 1;
+							RegWrite <= 0;
+						end
+
+						default:
+						RegWrite <= 0;
 						
 					endcase
-					Jump <= 0;
 					RegDst <= 1;
 					BranchEqual <= 0;
 					MemRead <= 0;
@@ -262,6 +266,7 @@ module Controller(Clk);
 				end
 				2: begin // Jump
 					Jump <= 1;
+					JumpSel <= 0;
 					MemWrite <= 0;
 					RegWrite <= 0;
 					BranchNotEqual <= 0;
@@ -369,6 +374,7 @@ module Controller(Clk);
 				end
 				3: begin // JAL
 					Jump <= 1;
+					JumpSel <= 0;
 					RegDst <= 2;
 					BranchEqual <= 0;
 					MemRead <= 0;
