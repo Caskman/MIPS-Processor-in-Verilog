@@ -33,7 +33,7 @@
 // which generates a continuous clock pulse into the module.
 ////////////////////////////////////////////////////////////////////////////////
 
-module InstructionFetchUnit(Instruction, Reset, Clk,InstructOffset,Branch,JumpInstruction,Jump);
+module InstructionFetchUnit(Instruction, Reset, Clk,InstructOffset,Branch,JumpInstruction,Jump,NextInstruct);
 
     /* Please fill in the implementation here... */
 	 wire [31:0] PCAdderOut,PCNext,Instruction,ALUResult,PCOut,PCNextBJ;
@@ -44,7 +44,7 @@ module InstructionFetchUnit(Instruction, Reset, Clk,InstructOffset,Branch,JumpIn
 	 input [25:0] JumpInstruction;
 	 wire [31:0] JumpIn;
 	 
-	 output [31:0] Instruction;
+	 output [31:0] Instruction,NextInstruct;
 	 
 	 
 	 PCAdder adder(PCOut,PCAdderOut);
@@ -57,6 +57,7 @@ module InstructionFetchUnit(Instruction, Reset, Clk,InstructOffset,Branch,JumpIn
 	 ALU32Bit OffsetCalc(4'h2,PCOut,(InstructOffset<<2),ALUResult,Zero);
 	 
 	 assign JumpIn = (JumpInstruction<<2);
+	 assign NextInstruct = PCAdderOut;
 
 endmodule
 
