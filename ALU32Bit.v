@@ -39,6 +39,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 	input   [3:0]   ALUControl; // control bits for ALU operation
 	input   [31:0]  A, B;	    // inputs
 
+	integer temp,i,x;
 	output  reg [31:0]  ALUResult;	// answer
 	output  reg     Zero;	    // Zero=1 if ALUResult == 0
 
@@ -117,7 +118,18 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end
 			end
 		end
-
+		else if (ALUControl == 12) // CLO/CLZ
+		begin
+			x = B;
+			temp = 32;
+			for (i = 31; i >= 0; i = i - 1) begin
+					if (A[i] == x) begin
+						temp = 31 - i;
+						i = -2;
+					end
+			end
+			ALUResult <= temp;
+		end
 
 
     end
