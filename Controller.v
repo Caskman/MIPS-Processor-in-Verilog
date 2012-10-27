@@ -4,18 +4,17 @@ module Controller(Clk);
 	
 	input Clk;
    wire  [31:0]  WriteDataToMem,Instruction,WriteDataToReg,ReadData1;
-	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
+	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA,HardZero;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
 	reg [1:0] ALUBSrc;
 	reg MemtoReg,MemWrite,MemRead,RegDst,ALUASrc,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
-	reg HardZero,BranchBLTZ_BGTZ,BranchBGEZ;
+	reg BranchBLTZ_BGTZ,BranchBGEZ;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal;
 	
 	initial begin
 		Reset <= 0;
-		HardZero <= 0;
 	end
 
    InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,Instruction[25:0],Jump);
@@ -33,9 +32,10 @@ module Controller(Clk);
 	assign WriteDataToMem = ReadData2;
 	assign BranchOut1 = BranchEqual & Zero; // Represents AND gate
 	assign BranchOut2 = BranchNotEqual & (~Zero);
-	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult;
-	assign BranchOut4 = BranchBGEZ & ~ALUResult;
+	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult[0];
+	assign BranchOut4 = BranchBGEZ & ~(ALUResult[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
+	assign HardZero = 0;
 	 
  
 	always @(Instruction) begin

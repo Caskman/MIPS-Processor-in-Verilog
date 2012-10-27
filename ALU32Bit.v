@@ -107,7 +107,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 					ALUResult <= 1;
 				end
 			end else begin
-				if (A < B)
+				if (A <= B)
 				begin
 					ALUResult <= 0;
 				end
