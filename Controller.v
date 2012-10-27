@@ -41,7 +41,6 @@ module Controller(Clk);
  
 	always @(Instruction) begin
 	
-		$display("Instruction = %h",Instruction);
 		
 //			Jump <= 0;
 //			RegDst <= 1;
