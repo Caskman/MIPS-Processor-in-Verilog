@@ -24,7 +24,7 @@ module sign_extension(out, in,ExtendSign);
     always@(in)
 	 begin
 		if (ExtendSign == 0) begin
-			out <= in;
+			out <= 32'h00000000 + in;
 		end else begin
 			if ((in & 16'h8000) == 16'h8000)
 			begin

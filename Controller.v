@@ -34,9 +34,10 @@ module Controller(Clk);
 	assign WriteDataToMem = ReadData2;
 	assign BranchOut1 = BranchEqual & Zero; // Represents AND gate
 	assign BranchOut2 = BranchNotEqual & (~Zero);
-	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult;
-	assign BranchOut4 = BranchBGEZ & ~ALUResult;
+	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult[0];
+	assign BranchOut4 = BranchBGEZ & ~(ALUResult[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
+	assign HardZero = 0;
 	 
  
 	always @(Instruction) begin
