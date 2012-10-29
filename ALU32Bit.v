@@ -143,7 +143,6 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 		begin
 			ALUResult <= A^B;
 		end
-
     end
 
 

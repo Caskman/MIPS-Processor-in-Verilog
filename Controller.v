@@ -177,6 +177,24 @@ module Controller(Clk);
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end
+						35: begin // SUBU
+							Jump <= 0;
+							JumpSel <= 0;
+							MemRead <= 0;
+							MemtoReg <= 0;
+							MemWrite <= 0;
+							ALUControl <= 6;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							BranchEqual <= 0;
+							BranchNotEqual <= 0;
+							BranchBLTZ_BGTZ <= 0;
+							BranchBGEZ <= 0;
+							RegWrite <= 1;
+							RegDataSel <= 0;
+							RegDst <= 1;
+							RegWriteSel <= 0;
+						end
 						default:
 						RegWrite <= 0;
 						
