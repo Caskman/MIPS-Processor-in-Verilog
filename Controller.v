@@ -26,7 +26,7 @@ module Controller(Clk);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_2to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,ALUASrc);
-	mux_8to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,ALUBSrc);
+	mux_8to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd0,32'd0,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
 	mux_2to1_32bit JumpSelMux(JumpAddress,Instruction[25:0],ReadRegister1,JumpSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
@@ -153,15 +153,23 @@ module Controller(Clk);
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end
+						6: begin // ROTRV
+							Jump <= 0;
+							ALUControl <= 13;
+							ALUASrc <= 1;
+							ALUBSrc <= 5;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+						end
 						default:
 						RegWrite <= 0;
 						
 					endcase
 					RegDst <= 1;
-					BranchEqual <= 0;
 					MemRead <= 0;
 					MemtoReg <= 0;
 					MemWrite <= 0;
+					BranchEqual <= 0;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
@@ -201,8 +209,8 @@ module Controller(Clk);
 							BranchBGEZ <= 0;
 							RegDataSel <= 0;
 						end
-						RegWriteSel <= 0;
 					endcase
+					RegWriteSel <= 0;
 				end
 				8: begin // ADDI
 					Jump <= 0;

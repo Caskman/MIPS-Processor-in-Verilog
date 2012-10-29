@@ -40,6 +40,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 	input   [31:0]  A, B;	    // inputs
 
 	integer temp,i,x;
+	reg [31:0] y;
 	output  reg [31:0]  ALUResult;	// answer
 	output  reg     Zero;	    // Zero=1 if ALUResult == 0
 
@@ -132,11 +133,11 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 		end
 		else if (ALUControl == 13) // ROTR
 		begin
-			if (B == 0) begin
-				ALUResult <= A;
-			end else begin
-				ALUResult <= {A[B-1:0],A[31:B]};
+			y = A;
+			for (i = B;i > 0; i = i - 1) begin
+				y = {y[0],y[31:1]};
 			end
+			ALUResult <= y;
 		end
 
     end
