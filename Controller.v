@@ -126,7 +126,7 @@ module Controller(Clk);
 						0: begin // SLL
 							ALUControl <= 10;
 							RegWrite <= 1;
-							ALUBSrc <= 1;
+							ALUBSrc <= 4;
 							ALUASrc <= 1;
 							Jump <= 0;
 							RegWriteSel <= 0;
@@ -166,6 +166,14 @@ module Controller(Clk);
 							ALUControl <= 4;
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+						end
+						4: begin // SLLV
+							Jump <= 0;
+							ALUControl <= 10;
+							ALUASrc <= 1;
+							ALUBSrc <= 4;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end

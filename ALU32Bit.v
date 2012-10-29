@@ -98,7 +98,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 		end
 		else if (ALUControl == 10) // SLL
 		begin
-			ALUResult <= A << (B[10:6]);
+			ALUResult <= A << (B);
 		end
 		else if (ALUControl == 11) // SGT - Set Greater Than
 		begin
