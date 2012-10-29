@@ -263,7 +263,6 @@ module Controller(Clk);
 							BranchBGEZ <= 0;
 							RegDataSel <= 0;
 						end
-						RegWriteSel <= 0;
 					endcase
 					RegWriteSel <= 0;
 				end
