@@ -8,9 +8,9 @@ module Controller(Clk);
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
-	reg [1:0] RegDst,RegDataSel;
+	reg [1:0] RegDst,RegDataSel,ALUASrc;
 	reg [2:0] ALUBSrc;
-	reg MemtoReg,MemWrite,MemRead,ALUASrc,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
+	reg MemtoReg,MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
 	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
 	
@@ -25,9 +25,9 @@ module Controller(Clk);
 	sign_extension InstExtend(Extended15to0Inst,Instruction[15:0],ExtendSign);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
-	mux_2to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,ALUASrc);
-	mux_8to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,{27'b0,Instruction[10:6]},ReadData1,32'd0,32'd0,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,ReadData1,32'b0,RegDataSel);
+	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,Extended15to0Inst,32'b0,ALUASrc);
+	mux_8to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd16,32'd0,ALUBSrc);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
 
 	assign ReadRegister1 = Instruction[25:21];// rs
@@ -521,6 +521,24 @@ module Controller(Clk);
 					ALUControl <= 14;
 					ALUASrc <= 0;
 					ALUBSrc <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegDataSel <= 0;
+					RegDst <= 0;
+					RegWriteSel <= 0;
+					ExtendSign <= 0;
+				end
+				15: begin // LUI
+					Jump <= 0;
+					MemRead <= 0;
+					MemtoReg <= 0;
+					MemWrite <= 0;
+					ALUControl <= 10;
+					ALUASrc <= 2;
+					ALUBSrc <= 6;
 					BranchEqual <= 0;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
