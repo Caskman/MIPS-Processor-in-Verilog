@@ -7,8 +7,6 @@ sb
 seb
 seh
 sh
-sltiu
-sltu
 sra
 srav
 srl
