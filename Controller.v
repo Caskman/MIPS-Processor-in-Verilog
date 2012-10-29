@@ -3,12 +3,13 @@ module Controller(Clk);
 	
 	
 	input Clk;
-	wire  [31:0]  WriteDataToMem,Instruction,WriteDataToReg,ReadData1,MemToRegData,NextInstruct;
+	wire [31:0]  WriteDataToMem,Instruction,WriteDataToReg,ReadData1,MemToRegData,NextInstruct;
 	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA,JumpAddress;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
-	reg [1:0] ALUBSrc,RegDst,RegDataSel;
+	reg [1:0] RegDst,RegDataSel;
+	reg [2:0] ALUBSrc;
 	reg MemtoReg,MemWrite,MemRead,ALUASrc,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
 	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
@@ -16,7 +17,7 @@ module Controller(Clk);
 	initial begin
 		Reset <= 0;
 	end
-
+	
 	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,JumpAddress,Jump,NextInstruct);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult, Zero);
@@ -25,7 +26,7 @@ module Controller(Clk);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_2to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,ALUASrc);
-	mux_4to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,ALUBSrc);
+	mux_8to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
 	mux_2to1_32bit JumpSelMux(JumpAddress,Instruction[25:0],ReadRegister1,JumpSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
@@ -144,7 +145,14 @@ module Controller(Clk);
 							RegDataSel <= 2;
 							RegWriteSel <= 1;
 						end
-
+						2: begin // ROTR
+							Jump <= 0;
+							ALUControl <= 13;
+							ALUASrc <= 1;
+							ALUBSrc <= 4;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+						end
 						default:
 						RegWrite <= 0;
 						

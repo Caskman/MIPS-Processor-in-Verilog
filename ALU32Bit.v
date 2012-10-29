@@ -130,7 +130,14 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			end
 			ALUResult <= temp;
 		end
-
+		else if (ALUControl == 13) // ROTR
+		begin
+			if (B == 0) begin
+				ALUResult <= A;
+			end else begin
+				ALUResult <= {A[B-1:0],A[31:B]};
+			end
+		end
 
     end
 
