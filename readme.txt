@@ -13,4 +13,3 @@ sra
 srav
 srl
 srlv
-subu
