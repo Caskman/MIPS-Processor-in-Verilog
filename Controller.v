@@ -5,29 +5,30 @@ module Controller(Clk);
 	input Clk;
 	wire  [31:0]  WriteDataToMem,Instruction,WriteDataToReg,ReadData1,MemToRegData,NextInstruct;
 	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA,JumpAddress;
-	reg Reset,RegWrite,RegDataSel;
+	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
-	reg [1:0] ALUBSrc,RegDst;
+	reg [1:0] ALUBSrc,RegDst,RegDataSel;
 	reg MemtoReg,MemWrite,MemRead,ALUASrc,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
-	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel;
-	wire Zero,BranchOut1,BranchOut2,BranchOutTotal;
+	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel;
+	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
 	
 	initial begin
 		Reset <= 0;
 	end
 
 	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,JumpAddress,Jump,NextInstruct);
-	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWrite,Clk,ReadData1,ReadData2);
+	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult, Zero);
 	DataMemory DMem(ALUResult, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem);
+	sign_extension InstExtend(Extended15to0Inst,Instruction[15:0],ExtendSign);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_2to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,ALUASrc);
 	mux_4to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,ALUBSrc);
-	sign_extension InstExtend(Extended15to0Inst,Instruction[15:0],ExtendSign);
-	mux_2to1_32bit RegWriteDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
+	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
 	mux_2to1_32bit JumpSelMux(JumpAddress,Instruction[25:0],ReadRegister1,JumpSel);
+	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
 
 	assign ReadRegister1 = Instruction[25:21];// rs
 	assign ReadRegister2 = Instruction[20:16];// rt
@@ -37,28 +38,28 @@ module Controller(Clk);
 	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult[0];
 	assign BranchOut4 = BranchBGEZ & ~(ALUResult[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
-	assign HardZero = 0;
 	 
  
 	always @(Instruction) begin
 	
 		
 //			Jump <= 0;
-//			RegDst <= 1;
-//			BranchEqual <= 0;
+//			JumpSel <= 0;
 //			MemRead <= 0;
 //			MemtoReg <= 0;
 //			MemWrite <= 0;
-//			ALUBSrc <= 0;
 //			ALUControl <= 0;
-//			RegWrite <= 0;
-//			BranchNotEqual <= 0;
 //			ALUASrc <= 0;
-//			ExtendSign <= 0;
+//			ALUBSrc <= 0;
+//			BranchEqual <= 0;
+//			BranchNotEqual <= 0;
 //			BranchBLTZ_BGTZ <= 0;
 //			BranchBGEZ <= 0;
+//			RegWrite <= 0;
 //			RegDataSel <= 0;
-//			JumpSel <= 0;
+//			RegDst <= 1;
+//			RegWriteSel <= 0;
+//			ExtendSign <= 0;
 
 
 		if (Instruction != 0) begin
@@ -71,6 +72,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							ALUASrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						33: begin // ADDU
 							ALUControl <= 2;
@@ -78,6 +80,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							ALUASrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						36:begin // AND
 							ALUControl <= 0;
@@ -85,6 +88,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						37: begin // OR
 							ALUControl <= 1;
@@ -92,6 +96,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						34:begin // SUB
 							ALUControl <= 6;
@@ -99,6 +104,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						42:begin // SLT
 							ALUControl <= 7;
@@ -106,6 +112,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						39: begin // NOR
 							ALUControl <= 3;
@@ -113,6 +120,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						0: begin // SLL
 							ALUControl <= 10;
@@ -120,11 +128,21 @@ module Controller(Clk);
 							ALUBSrc <= 1;
 							ALUASrc <= 1;
 							Jump <= 0;
+							RegWriteSel <= 0;
 						end
 						8: begin // JR
 							Jump <= 1;
 							JumpSel <= 1;
 							RegWrite <= 0;
+							RegWriteSel <= 0;
+						end
+						10: begin // MOVZ
+							Jump <= 0;
+							ALUBSrc <= 2;
+							ALUControl <= 2;
+							ALUASrc <= 1;
+							RegDataSel <= 2;
+							RegWriteSel <= 1;
 						end
 
 						default:
@@ -175,6 +193,7 @@ module Controller(Clk);
 							BranchBGEZ <= 0;
 							RegDataSel <= 0;
 						end
+						RegWriteSel <= 0;
 					endcase
 				end
 				8: begin // ADDI
@@ -193,7 +212,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					ALUASrc <= 0;
 					ExtendSign <= 1;
-					$display("ADDI");
+					RegWriteSel <= 0;
 				end
 				9: begin //ADDIU
 					Jump <= 0;
@@ -211,6 +230,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					ALUASrc <= 0;
 					ExtendSign <= 0;
+					RegWriteSel <= 0;
 				end
 				12: begin // ANDI
 					Jump <= 0;
@@ -228,7 +248,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					ALUASrc <= 0;
 					ExtendSign <= 0;
-					$display("ANDI");
+					RegWriteSel <= 0;
 				end
 				13: begin // ORI
 					Jump <= 0;
@@ -246,7 +266,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
-					$display("ORI");
+					RegWriteSel <= 0;
 				end
 				4: begin // BEQ
 					BranchEqual <= 1;
@@ -262,7 +282,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
-					$display("BEQ");
+					RegWriteSel <= 0;
 				end
 				2: begin // Jump
 					Jump <= 1;
@@ -272,7 +292,7 @@ module Controller(Clk);
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
-					$display("Jump");
+					RegWriteSel <= 0;
 				end
 				35: begin // LW
 					Jump <= 0;
@@ -290,7 +310,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
-					$display("LW");
+					RegWriteSel <= 0;
 				end
 				43: begin // SW
 					Jump <= 0;
@@ -305,7 +325,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
-					$display("SW");
+					RegWriteSel <= 0;
 				end
 				5: begin // BNE
 					Jump <= 0;
@@ -319,7 +339,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
-					$display("SW");
+					RegWriteSel <= 0;
 				end
 				28: begin // MUL 
 					RegDst <= 1;
@@ -335,6 +355,7 @@ module Controller(Clk);
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
+					RegWriteSel <= 0;
 				end
 				1: begin // BGEZ & BLTZ 
 					case (Instruction[20:16])
@@ -357,6 +378,7 @@ module Controller(Clk);
 					BranchNotEqual <= 0;
 					ALUASrc <= 0;
 					ExtendSign <= 0;
+					RegWriteSel <= 0;
 				end
 				7: begin // BGTZ
 					Jump <= 0;
@@ -371,6 +393,7 @@ module Controller(Clk);
 					ExtendSign <= 0;
 					BranchBGEZ <= 0;
 					BranchBLTZ_BGTZ <= 1;
+					RegWriteSel <= 0;
 				end
 				3: begin // JAL
 					Jump <= 1;
@@ -384,6 +407,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					RegDataSel <= 1;
+					RegWriteSel <= 0;
 				end
 			endcase
 			NOOP <= 0;
@@ -404,6 +428,7 @@ module Controller(Clk);
 			BranchBLTZ_BGTZ <= 0;
 			ExtendSign <= 0;
 			RegDataSel <= 0;
+			RegWriteSel <= 0;
 		end
 	end
 
