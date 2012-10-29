@@ -2,7 +2,6 @@ lb
 lbu
 lh
 lhu
-lui
 sb
 seb
 seh
