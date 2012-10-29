@@ -441,6 +441,42 @@ module Controller(Clk);
 					RegDataSel <= 1;
 					RegWriteSel <= 0;
 				end
+				14: begin // XORI
+					Jump <= 0;
+					MemRead <= 0;
+					MemtoReg <= 0;
+					MemWrite <= 0;
+					ALUControl <= 4;
+					ALUASrc <= 0;
+					ALUBSrc <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegDataSel <= 0;
+					RegDst <= 0;
+					RegWriteSel <= 0;
+					ExtendSign <= 0;
+				end
+				10: begin // SLTI
+					Jump <= 0;
+					MemRead <= 0;
+					MemtoReg <= 0;
+					MemWrite <= 0;
+					ALUControl <= 7;
+					ALUASrc <= 0;
+					ALUBSrc <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegDataSel <= 0;
+					RegDst <= 1;
+					RegWriteSel <= 0;
+					ExtendSign <= 1;
+				end
 			endcase
 			NOOP <= 0;
 		end else begin
