@@ -513,6 +513,24 @@ module Controller(Clk);
 					RegWriteSel <= 0;
 					ExtendSign <= 1;
 				end
+				11: begin // SLTIU
+					Jump <= 0;
+					MemRead <= 0;
+					MemtoReg <= 0;
+					MemWrite <= 0;
+					ALUControl <= 14;
+					ALUASrc <= 0;
+					ALUBSrc <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegDataSel <= 0;
+					RegDst <= 0;
+					RegWriteSel <= 0;
+					ExtendSign <= 0;
+				end
 			endcase
 			NOOP <= 0;
 		end else begin
