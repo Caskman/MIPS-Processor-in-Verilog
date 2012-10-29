@@ -139,6 +139,10 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			end
 			ALUResult <= y;
 		end
+		else if (ALUControl == 4) // XOR
+		begin
+			ALUResult <= A^B;
+		end
 
     end
 

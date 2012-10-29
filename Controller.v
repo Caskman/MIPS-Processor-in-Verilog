@@ -161,6 +161,14 @@ module Controller(Clk);
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end
+						38: begin // XOR
+							Jump <= 0;
+							ALUControl <= 4;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+						end
 						default:
 						RegWrite <= 0;
 						
