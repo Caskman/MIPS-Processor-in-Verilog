@@ -49,104 +49,82 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 
     always @(ALUControl,A,B)
     begin
-    	if (ALUControl == 0) // AND
-    	begin
-    		ALUResult <= A & B;
-    	end
-    	else if (ALUControl == 1) // OR
-    	begin
-    		ALUResult <= A | B;
-    	end
-    	else if (ALUControl == 2) // ADD
-    	begin
-    		ALUResult <= A + B;
-    	end
-    	else if (ALUControl == 6) // SUB
-    	begin
-    		ALUResult <= A + (~B + 1);
-    	end
-    	else if (ALUControl == 7) // SLT
-    	begin
-			if (A[31] != B[31]) begin
-				if (A[31] > B[31]) begin
-					ALUResult <= 1;
-				end else begin
-					ALUResult <= 0;
-				end
-			end else begin
-				if (A < B)
-				begin
-					ALUResult <= 1;
-				end
-				else
-				begin
-					ALUResult <= 0;
-				end
-			end
-    	end
-		else if (ALUControl == 3) // NOR
-		begin
-			ALUResult <= ~(A | B);
-		end
-		else if (ALUControl == 8) // Jump
-		begin
-			ALUResult <= 0;
-		end
-		else if (ALUControl == 9) // MUL
-		begin
-			ALUResult <= A * B;
-		end
-		else if (ALUControl == 10) // SLL
-		begin
-			ALUResult <= A << (B);
-		end
-		else if (ALUControl == 11) // SGT - Set Greater Than
-		begin
-			if (A[31] != B[31]) begin
-				if (A[31] > B[31]) begin
-					ALUResult <= 0;
-				end else begin
-					ALUResult <= 1;
-				end
-			end else begin
-				if (A <= B)
-				begin
-					ALUResult <= 0;
-				end
-				else
-				begin
-					ALUResult <= 1;
-				end
-			end
-		end
-		else if (ALUControl == 12) // CLO/CLZ
-		begin
-			x = B;
-			temp = 32;
-			for (i = 31; i >= 0; i = i - 1) begin
-					if (A[i] == x) begin
-						temp = 31 - i;
-						i = -2;
+		case (ALUControl)
+			0: // AND
+				ALUResult <= A & B;
+			1: // OR
+				ALUResult <= A | B;
+			2: // ADD
+				ALUResult <= A + B;
+			6: // SUB
+				ALUResult <= A + (~B + 1);
+			7: begin // SLT
+				if (A[31] != B[31]) begin
+					if (A[31] > B[31]) begin
+						ALUResult <= 1;
+					end else begin
+						ALUResult <= 0;
 					end
+				end else begin
+					if (A < B)
+					begin
+						ALUResult <= 1;
+					end
+					else
+					begin
+						ALUResult <= 0;
+					end
+				end
 			end
-			ALUResult <= temp;
-		end
-		else if (ALUControl == 13) // ROTR
-		begin
-			y = A;
-			for (i = B;i > 0; i = i - 1) begin
-				y = {y[0],y[31:1]};
+			3: // NOR
+				ALUResult <= ~(A | B);
+			8: // Jump
+				ALUResult <= 0;
+			9: // MUL
+				ALUResult <= A * B;
+			10: // SLL
+				ALUResult <= A << (B);
+			11: begin // SGT - Set Greater Than
+				if (A[31] != B[31]) begin
+					if (A[31] > B[31]) begin
+						ALUResult <= 0;
+					end else begin
+						ALUResult <= 1;
+					end
+				end else begin
+					if (A <= B)
+					begin
+						ALUResult <= 0;
+					end
+					else
+					begin
+						ALUResult <= 1;
+					end
+				end
 			end
-			ALUResult <= y;
-		end
-		else if (ALUControl == 4) // XOR
-		begin
-			ALUResult <= A^B;
-		end
-		else if (ALUControl == 14) // SLTU
-		begin
-			ALUResult <= A < B;
-		end
+			12: begin // CLO/CLZ
+				x = B;
+				temp = 32;
+				for (i = 31; i >= 0; i = i - 1) begin
+						if (A[i] == x) begin
+							temp = 31 - i;
+							i = -2;
+						end
+				end
+				ALUResult <= temp;
+			end
+			13: begin // ROTR
+				y = A;
+				for (i = B;i > 0; i = i - 1) begin
+					y = {y[0],y[31:1]};
+				end
+				ALUResult <= y;
+			end
+			4: // XOR
+				ALUResult <= A^B;
+			14: // SLTU
+				ALUResult <= A < B;
+		endcase
 	end
 
 
