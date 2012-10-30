@@ -30,7 +30,8 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData,BHW,Exten
 
     input [31:0] Address; 	// Input Address 
     input [31:0] WriteData; // Data that needs to be written into the address 
-    input Clk;
+	 input [1:0] BHW;
+    input Clk,ExtendSign;
     input MemWrite; 		// Control signal for memory write 
     input MemRead; 			// Control signal for memory read 
 
