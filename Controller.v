@@ -595,6 +595,46 @@ module Controller(Clk);
 					BHW <= 0;
 					DataMemExtendSign <= 0;
 				end
+				33: begin // LH
+					Jump <= 0;
+					MemRead <= 1;
+					MemtoReg <= 1;
+					MemWrite <= 0;
+					ALUControl <= 2;
+					ALUASrc <= 0;
+					ALUBSrc <= 1;
+					ExtendSign <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegWriteSel <= 0;
+					RegDataSel <= 0;
+					RegDst <= 0;
+					BHW <= 1;
+					DataMemExtendSign <= 1;
+				end
+				37: begin // LHU
+					Jump <= 0;
+					MemRead <= 1;
+					MemtoReg <= 1;
+					MemWrite <= 0;
+					ALUControl <= 2;
+					ALUASrc <= 0;
+					ALUBSrc <= 1;
+					ExtendSign <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegWriteSel <= 0;
+					RegDataSel <= 0;
+					RegDst <= 0;
+					BHW <= 1;
+					DataMemExtendSign <= 0;
+				end
 			endcase
 			NOOP <= 0;
 		end else begin
