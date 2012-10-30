@@ -1,10 +1,5 @@
-lbu
-lh
-lhu
-sb
 seb
 seh
-sh
 sra
 srav
 srl
