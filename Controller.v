@@ -8,10 +8,10 @@ module Controller(Clk);
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
-	reg [1:0] RegDst,RegDataSel,ALUASrc;
+	reg [1:0] RegDst,RegDataSel,ALUASrc,BHW;
 	reg [2:0] ALUBSrc;
 	reg MemtoReg,MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
-	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel;
+	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel,DataMemExtendSign;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
 	
 	initial begin
@@ -21,7 +21,7 @@ module Controller(Clk);
 	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,Instruction[25:0],Jump,NextInstruct,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult, Zero);
-	DataMemory DMem(ALUResult, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem);
+	DataMemory DMem(ALUResult, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
 	sign_extension InstExtend(Extended15to0Inst,Instruction[15:0],ExtendSign);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
@@ -60,6 +60,8 @@ module Controller(Clk);
 //			RegDst <= 1;
 //			RegWriteSel <= 0;
 //			ExtendSign <= 0;
+//			BHW <= 0;
+//			DataMemExtendSign <= 0;
 
 
 		if (Instruction != 0) begin
@@ -379,6 +381,8 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
 					RegWriteSel <= 0;
+					BHW <= 2;
+					DataMemExtendSign <= 1;
 				end
 				43: begin // SW
 					Jump <= 0;
@@ -394,6 +398,8 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					ExtendSign <= 0;
 					RegWriteSel <= 0;
+					BHW <= 2;
+					DataMemExtendSign <= 1;
 				end
 				5: begin // BNE
 					Jump <= 0;
