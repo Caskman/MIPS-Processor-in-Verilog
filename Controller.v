@@ -51,15 +51,15 @@ module Controller(Clk);
 //			ALUControl <= 0;
 //			ALUASrc <= 0;
 //			ALUBSrc <= 0;
+//			ExtendSign <= 0;
 //			BranchEqual <= 0;
 //			BranchNotEqual <= 0;
 //			BranchBLTZ_BGTZ <= 0;
 //			BranchBGEZ <= 0;
 //			RegWrite <= 0;
+//			RegWriteSel <= 0;
 //			RegDataSel <= 0;
 //			RegDst <= 1;
-//			RegWriteSel <= 0;
-//			ExtendSign <= 0;
 //			BHW <= 0;
 //			DataMemExtendSign <= 0;
 
@@ -574,6 +574,26 @@ module Controller(Clk);
 					ExtendSign <= 1;
 					BHW <= 0;
 					DataMemExtendSign <= 1;
+				end
+				36: begin // LBU
+					Jump <= 0;
+					MemRead <= 1;
+					MemtoReg <= 1;
+					MemWrite <= 0;
+					ALUControl <= 2;
+					ALUASrc <= 0;
+					ALUBSrc <= 1;
+					BranchEqual <= 0;
+					BranchNotEqual <= 0;
+					BranchBLTZ_BGTZ <= 0;
+					BranchBGEZ <= 0;
+					RegWrite <= 1;
+					RegDataSel <= 0;
+					RegDst <= 0;
+					RegWriteSel <= 0;
+					ExtendSign <= 1;
+					BHW <= 0;
+					DataMemExtendSign <= 0;
 				end
 			endcase
 			NOOP <= 0;
