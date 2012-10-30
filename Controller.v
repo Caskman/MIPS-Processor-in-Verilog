@@ -668,26 +668,67 @@ module Controller(Clk);
 					BHW <= 1;
 					DataMemExtendSign <= 1;
 				end
+				31: begin // SPECIAL3
+					case (Instruction[10:6])
+						16: begin // SEB
+							Jump <= 0;
+							MemRead <= 0;
+							MemtoReg <= 0;
+							MemWrite <= 0;
+							ALUControl <= 5;
+							ALUASrc <= 1;
+							ALUBSrc <= 2;
+							BranchEqual <= 0;
+							BranchNotEqual <= 0;
+							BranchBLTZ_BGTZ <= 0;
+							BranchBGEZ <= 0;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+							RegDataSel <= 0;
+							RegDst <= 1;
+						end
+						24: begin // SEH
+							Jump <= 0;
+							MemRead <= 0;
+							MemtoReg <= 0;
+							MemWrite <= 0;
+							ALUControl <= 5;
+							ALUASrc <= 1;
+							ALUBSrc <= 3;
+							BranchEqual <= 0;
+							BranchNotEqual <= 0;
+							BranchBLTZ_BGTZ <= 0;
+							BranchBGEZ <= 0;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+							RegDataSel <= 0;
+							RegDst <= 1;
+						end
+					endcase
+				end
 			endcase
 			NOOP <= 0;
 		end else begin
 			NOOP <= 1;
 			Jump <= 0;
-			RegDst <= 0;
-			BranchEqual <= 0;
+			JumpSel <= 0;
 			MemRead <= 0;
 			MemtoReg <= 0;
 			MemWrite <= 0;
-			ALUBSrc <= 0;
 			ALUControl <= 0;
-			RegWrite <= 0;
-			BranchNotEqual <= 0;
 			ALUASrc <= 0;
-			BranchBGEZ <= 0;
-			BranchBLTZ_BGTZ <= 0;
+			ALUBSrc <= 0;
 			ExtendSign <= 0;
-			RegDataSel <= 0;
+			BranchEqual <= 0;
+			BranchNotEqual <= 0;
+			BranchBLTZ_BGTZ <= 0;
+			BranchBGEZ <= 0;
+			RegWrite <= 0;
 			RegWriteSel <= 0;
+			RegDataSel <= 0;
+			RegDst <= 0;
+			BHW <= 0;
+			DataMemExtendSign <= 0;
 		end
 	end
 
