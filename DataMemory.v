@@ -26,7 +26,7 @@
 // clocked.
 ////////////////////////////////////////////////////////////////////////////////
 
-module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData); 
+module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData,BHW,ExtendSign); 
 
     input [31:0] Address; 	// Input Address 
     input [31:0] WriteData; // Data that needs to be written into the address 
@@ -37,9 +37,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData);
     output reg[31:0] ReadData; // Contents of memory location at Address
 
     reg 	[31:0] 	Memory[0:1024];	// size needs to be adjusted based on the size of the test_data.txt
-   
-   //assign ReadData = (MemRead == 1) ? Memory[Address] : 32'h00000000;
-   
+      
    		always 	@(posedge Clk)		   //Memory write
    		begin
    		
@@ -50,7 +48,56 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData);
    		always @(Address or MemRead)
    		begin	
    			if	(MemRead == 1)
-   				ReadData <= Memory[Address>>2];	//Memory read
+				case (BHW)
+					0: begin // BYTE
+						case (Address[1:0]) // 31:24,23:16,15:8,7:0
+							0: begin
+								if (ExtendSign)
+									ReadData <= {Memory[Address>>2][7],24'b0,Memory[Address>>2][6:0]};
+								else 
+									ReadData <= {24'b0,Memory[Address>>2][7:0]};
+							end
+							1: begin
+								if (ExtendSign)
+									ReadData <= {Memory[Address>>2][15],24'b0,Memory[Address>>2][14:8]};
+								else 
+									ReadData <= {24'b0,Memory[Address>>2][15:8]};
+							end
+							2: begin
+								if (ExtendSign)
+									ReadData <= {Memory[Address>>2][23],24'b0,Memory[Address>>2][22:16]};
+								else 
+									ReadData <= {24'b0,Memory[Address>>2][23:16]};
+							end
+							3: begin
+								if (ExtendSign)
+									ReadData <= {Memory[Address>>2][31],24'b0,Memory[Address>>2][30:24]};
+								else 
+									ReadData <= {24'b0,Memory[Address>>2][31:24]};
+							end
+						endcase
+					end
+					1: begin // HALFWORD
+						case (Address[1])
+							0: begin
+								if (ExtendSign)
+									ReadData <= {Memory[Address>>2][15],16'b0,Memory[Address>>2][14:0]};
+								else 
+									ReadData <= {16'b0,Memory[Address>>2][15:0]};
+							end	
+							1: begin
+								if (ExtendSign)
+									ReadData <= {Memory[Address>>2][31],16'b0,Memory[Address>>2][30:16]};
+								else 
+									ReadData <= {16'b0,Memory[Address>>2][31:16]};
+							end
+						endcase
+					end
+					2: begin // WORD
+						ReadData <= Memory[Address>>2];
+					end
+				endcase
+   				// ReadData <= Memory[Address>>2];	//Memory read
    			else
    				ReadData <= 32'h00000000;
 					
