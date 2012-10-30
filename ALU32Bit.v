@@ -41,6 +41,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 
 	integer temp,i,x;
 	reg [31:0] y;
+	reg sign;
 	output  reg [31:0]  ALUResult;	// answer
 	output  reg     Zero;	    // Zero=1 if ALUResult == 0
 
@@ -130,6 +131,13 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end else if (B == 1) begin // Half word
 					ALUResult <= {A[15],16'b0,A[14:0]};
 				end
+			end
+			15: begin // SRA
+				y = A;
+				for (i = B; i > 0; i = i - 1) begin
+					y = {y[31],y[31:1]};
+				end
+				ALUResult <= y;
 			end
 		endcase
 	end

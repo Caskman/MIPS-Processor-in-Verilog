@@ -214,6 +214,42 @@ module Controller(Clk);
 							RegDst <= 1;
 							RegWriteSel <= 0;
 						end
+						3: begin // SRA
+							Jump <= 0;
+							MemRead <= 0;
+							MemtoReg <= 0;
+							MemWrite <= 0;
+							ALUControl <= 15;
+							ALUASrc <= 1;
+							ALUBSrc <= 4;
+							BranchEqual <= 0;
+							BranchNotEqual <= 0;
+							BranchBLTZ_BGTZ <= 0;
+							BranchBGEZ <= 0;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+							RegDataSel <= 0;
+							RegDst <= 1;
+						end
+						7: begin // SRAV
+							Jump <= 0;
+							MemRead <= 0;
+							MemtoReg <= 0;
+							MemWrite <= 0;
+							ALUControl <= 15;
+							ALUASrc <= 1;
+							ALUBSrc <= 5;
+							BranchEqual <= 0;
+							BranchNotEqual <= 0;
+							BranchBLTZ_BGTZ <= 0;
+							BranchBGEZ <= 0;
+							RegWrite <= 1;
+							RegWriteSel <= 0;
+							RegDataSel <= 0;
+							RegDst <= 1;
+						end
+						
+						
 						default:
 						RegWrite <= 0;
 						
