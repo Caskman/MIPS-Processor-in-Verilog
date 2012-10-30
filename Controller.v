@@ -26,7 +26,7 @@ module Controller(Clk);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,Extended15to0Inst,32'b0,ALUASrc);
-	mux_8to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd16,32'd0,ALUBSrc);
+	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd16,{Instruction[21],Instruction[10:6]},{Instruction[6],ReadData1[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
 	mux_2to1_32bit JumpSelMux(JumpAddress,Instruction[25:0],ReadRegister1,JumpSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
@@ -147,19 +147,19 @@ module Controller(Clk);
 							RegDataSel <= 2;
 							RegWriteSel <= 1;
 						end
-						2: begin // ROTR
+						2: begin // ROTR & SRL
 							Jump <= 0;
 							ALUControl <= 13;
 							ALUASrc <= 1;
-							ALUBSrc <= 4;
+							ALUBSrc <= 7;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end
-						6: begin // ROTRV
+						6: begin // ROTRV & SRLV
 							Jump <= 0;
 							ALUControl <= 13;
 							ALUASrc <= 1;
-							ALUBSrc <= 5;
+							ALUBSrc <= 8;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end
@@ -216,40 +216,20 @@ module Controller(Clk);
 						end
 						3: begin // SRA
 							Jump <= 0;
-							MemRead <= 0;
-							MemtoReg <= 0;
-							MemWrite <= 0;
 							ALUControl <= 15;
 							ALUASrc <= 1;
 							ALUBSrc <= 4;
-							BranchEqual <= 0;
-							BranchNotEqual <= 0;
-							BranchBLTZ_BGTZ <= 0;
-							BranchBGEZ <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
-							RegDst <= 1;
 						end
 						7: begin // SRAV
 							Jump <= 0;
-							MemRead <= 0;
-							MemtoReg <= 0;
-							MemWrite <= 0;
 							ALUControl <= 15;
 							ALUASrc <= 1;
 							ALUBSrc <= 5;
-							BranchEqual <= 0;
-							BranchNotEqual <= 0;
-							BranchBLTZ_BGTZ <= 0;
-							BranchBGEZ <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
-							RegDst <= 1;
 						end
-						
-						
 						default:
 						RegWrite <= 0;
 						

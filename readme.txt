@@ -1,4 +1,1 @@
-sra
-srav
-srl
-srlv
+all instructions implemented

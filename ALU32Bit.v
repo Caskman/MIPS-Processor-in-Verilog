@@ -79,8 +79,8 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			end
 			3: // NOR
 				ALUResult <= ~(A | B);
-			8: // Jump
-				ALUResult <= 0;
+			8: begin // unoccupied
+			end
 			9: // MUL
 				ALUResult <= A * B;
 			10: // SLL
@@ -114,10 +114,13 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end
 				ALUResult <= temp;
 			end
-			13: begin // ROTR
+			13: begin // ROTR & SRL
 				y = A;
-				for (i = B;i > 0; i = i - 1) begin
-					y = {y[0],y[31:1]};
+				for (i = B[4:0];i > 0; i = i - 1) begin
+					if (B[5] == 1)
+						y = {y[0],y[31:1]};
+					else
+						y = {1'b0,y[31:1]};
 				end
 				ALUResult <= y;
 			end
