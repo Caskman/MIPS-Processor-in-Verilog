@@ -4,7 +4,7 @@ module Controller(Clk);
 	
 	input Clk;
 	wire [31:0]  WriteDataToMem,Instruction,WriteDataToReg,ReadData1,MemToRegData,NextInstruct;
-	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA,JumpAddress;
+	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl;
@@ -18,7 +18,7 @@ module Controller(Clk);
 		Reset <= 0;
 	end
 	
-	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,JumpAddress,Jump,NextInstruct);
+	InstructionFetchUnit IF(Instruction,Reset,Clk,Extended15to0Inst,BranchOutTotal,Instruction[25:0],Jump,NextInstruct,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult, Zero);
 	DataMemory DMem(ALUResult, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
@@ -28,7 +28,6 @@ module Controller(Clk);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,Extended15to0Inst,32'b0,ALUASrc);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd16,{Instruction[21],Instruction[10:6]},{Instruction[6],ReadData1[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
-	mux_2to1_32bit JumpSelMux(JumpAddress,Instruction[25:0],ReadRegister1,JumpSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
 
 	assign ReadRegister1 = Instruction[25:21];// rs
