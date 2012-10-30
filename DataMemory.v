@@ -41,13 +41,39 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData,BHW,Exten
    		always 	@(posedge Clk)		   //Memory write
    		begin
    		
-   		if (MemWrite==1)
-   				Memory[Address>>2] = WriteData;
+			if (MemWrite==1) begin
+				case (BHW)
+					0: begin
+						case (Address[1:0])
+							0:
+								Memory[Address>>2] = {Memory[Address>>2][31:8],WriteData[7:0]};
+							1:
+								Memory[Address>>2] = {Memory[Address>>2][31:16],WriteData[7:0],Memory[Address>>2][7:0]};
+							2:
+								Memory[Address>>2] = {Memory[Address>>2][31:24],WriteData[7:0],Memory[Address>>2][15:0]};
+							3:
+								Memory[Address>>2] = {WriteData[7:0],Memory[Address>>2][23:0]};
+						endcase
+					end
+					1: begin
+						case (Address[1])
+							0:
+								Memory[Address>>2] = {Memory[Address>>2][31:16],WriteData[15:0]};
+							1:
+								Memory[Address>>2] = {WriteData[31:16],Memory[Address>>2][15:0]};
+						endcase
+					end
+					2: begin
+						Memory[Address>>2] = WriteData;
+					end
+				endcase
+   				// Memory[Address>>2] = WriteData;
+			end
    		end
    		
    		always @(Address or MemRead)
    		begin	
-   			if	(MemRead == 1)
+   			if	(MemRead == 1) begin
 				case (BHW)
 					0: begin // BYTE
 						case (Address[1:0]) // 31:24,23:16,15:8,7:0
@@ -97,8 +123,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData,BHW,Exten
 						ReadData <= Memory[Address>>2];
 					end
 				endcase
-   				// ReadData <= Memory[Address>>2];	//Memory read
-   			else
+   			end else 
    				ReadData <= 32'h00000000;
 					
 					//$display("%h",Memory[Address]);
