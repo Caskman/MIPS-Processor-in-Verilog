@@ -124,6 +124,13 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				ALUResult <= A^B;
 			14: // SLTU
 				ALUResult <= A < B;
+			5: begin // Sign Extension
+				if (B == 0) begin // Byte
+					ALUResult <= {A[7],24'b0,A[6:0]};
+				end else if (B == 1) begin // Half word
+					ALUResult <= {A[15],16'b0,A[14:0]};
+				end
+			end
 		endcase
 	end
 
