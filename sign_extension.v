@@ -17,11 +17,9 @@ module sign_extension(out, in,ExtendSign);
     input   [15:0] in;
 	 input ExtendSign;
 	 reg [31:0] out;
-	 reg [15:0] A;
-	 reg [31:0] B;
 
     /* Fill in the implementation here... */ 
-    always@(in)
+    always@(in,ExtendSign)
 	 begin
 		if (ExtendSign == 0) begin
 			out <= {16'h0000 , in};
@@ -35,6 +33,6 @@ module sign_extension(out, in,ExtendSign);
 			  out <= in;
 			end
 		end
-		//out <= B;
+
 	 end
 endmodule
