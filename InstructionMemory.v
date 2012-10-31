@@ -34,7 +34,7 @@ module InstructionMemory(Address, Instruction);
 
 	initial
 	begin
-		$readmemh("code.txt",mem);
+		$readmemh("xori_test_hex.txt",mem);
 	end
 
 	assign Instruction = mem[Address>>2];	
