@@ -73,6 +73,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						33: begin // ADDU
 							ALUControl <= 2;
@@ -81,6 +82,7 @@ module Controller(Clk);
 							ALUASrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						36:begin // AND
 							ALUControl <= 0;
@@ -89,6 +91,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						37: begin // OR
 							ALUControl <= 1;
@@ -97,6 +100,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						34:begin // SUB
 							ALUControl <= 6;
@@ -105,6 +109,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						42:begin // SLT
 							ALUControl <= 7;
@@ -113,6 +118,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						39: begin // NOR
 							ALUControl <= 3;
@@ -121,6 +127,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						0: begin // SLL
 							ALUControl <= 10;
@@ -129,6 +136,7 @@ module Controller(Clk);
 							ALUASrc <= 1;
 							Jump <= 0;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						8: begin // JR
 							Jump <= 1;
@@ -139,7 +147,7 @@ module Controller(Clk);
 						10: begin // MOVZ
 							Jump <= 0;
 							ALUBSrc <= 2;
-							ALUControl <= 2;
+							ALUControl <= 6;
 							ALUASrc <= 1;
 							RegDataSel <= 2;
 							RegWriteSel <= 1;
@@ -151,6 +159,7 @@ module Controller(Clk);
 							ALUBSrc <= 4;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						6: begin // ROTRV
 							Jump <= 0;
@@ -159,6 +168,7 @@ module Controller(Clk);
 							ALUBSrc <= 5;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						38: begin // XOR
 							Jump <= 0;
@@ -167,6 +177,7 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						4: begin // SLLV
 							Jump <= 0;
@@ -175,24 +186,16 @@ module Controller(Clk);
 							ALUBSrc <= 4;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						35: begin // SUBU
 							Jump <= 0;
-							JumpSel <= 0;
-							MemRead <= 0;
-							MemtoReg <= 0;
-							MemWrite <= 0;
 							ALUControl <= 6;
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
-							BranchEqual <= 0;
-							BranchNotEqual <= 0;
-							BranchBLTZ_BGTZ <= 0;
-							BranchBGEZ <= 0;
 							RegWrite <= 1;
-							RegDataSel <= 0;
-							RegDst <= 1;
 							RegWriteSel <= 0;
+							RegDataSel <= 0;
 						end
 						default:
 						RegWrite <= 0;
@@ -206,7 +209,6 @@ module Controller(Clk);
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
-					RegDataSel <= 0;
 				end
 				28: begin // SPECIAL2
 					case (Instruction[5:0])
