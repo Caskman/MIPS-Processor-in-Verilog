@@ -7,9 +7,8 @@ module Controller(Clk);
 	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
-	reg [3:0] ALUControl;
+	reg [3:0] ALUControl,ALUBSrc;
 	reg [1:0] RegDst,RegDataSel,ALUASrc,BHW;
-	reg [2:0] ALUBSrc;
 	reg MemtoReg,MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
 	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel,DataMemExtendSign;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
@@ -27,7 +26,7 @@ module Controller(Clk);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,Extended15to0Inst,32'b0,ALUASrc);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd16,{Instruction[21],Instruction[10:6]},{Instruction[6],ReadData1[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc);
-	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,RegDataSel);
+	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,ReadData1,32'd0,RegDataSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
 
 	assign ReadRegister1 = Instruction[25:21];// rs

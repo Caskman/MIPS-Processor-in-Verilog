@@ -4,12 +4,12 @@ all adds tested
 to test:
 rotr
 rotrv
-xori
-slti
+xori // tested
+slti // tested
 sltu
 sltiu
-lui
-lb
+lui // tested
+lb // tested
 lbu
 lh
 lhu
