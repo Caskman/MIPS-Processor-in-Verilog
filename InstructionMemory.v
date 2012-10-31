@@ -34,7 +34,7 @@ module InstructionMemory(Address, Instruction);
 
 	initial
 	begin
-		$readmemh("sllv_test_hex.txt",mem);
+		$readmemh("code.txt",mem);
 	end
 
 	assign Instruction = mem[Address>>2];	

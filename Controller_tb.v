@@ -29,7 +29,7 @@ module Controller_tb(
 		Clk <= 1'b0;
 		forever #10 Clk <= ~Clk;
 		
-		 
+		
 		# 500;
 	end
 
