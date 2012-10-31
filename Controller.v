@@ -172,7 +172,7 @@ module Controller(Clk);
 							Jump <= 0;
 							ALUControl <= 10;
 							ALUASrc <= 1;
-							ALUBSrc <= 4;
+							ALUBSrc <= 5;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
 						end

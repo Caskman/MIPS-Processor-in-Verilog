@@ -122,13 +122,16 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 		else if (ALUControl == 12) // CLO/CLZ
 		begin
 			x = B;
-			temp = 32;
-			for (i = 31; i >= 0; i = i - 1) begin
-					if (A[i] == x) begin
-						temp = 31 - i;
-						i = -2;
-					end
+			temp = 0;
+			for (i = 31; i >= 0; i = i - 1) begin	
+				if (A[i] != x) begin
+					i = -1;
+				end	
+				if(A[i] == x)begin
+					temp = temp + 1;
+				end
 			end
+	
 			ALUResult <= temp;
 		end
 		else if (ALUControl == 13) // ROTR
