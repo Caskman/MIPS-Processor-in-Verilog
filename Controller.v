@@ -492,7 +492,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					RegWrite <= 1;
 					RegDataSel <= 0;
-					RegDst <= 1;
+					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 1;
 				end

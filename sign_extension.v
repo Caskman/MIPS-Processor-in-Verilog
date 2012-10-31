@@ -24,11 +24,11 @@ module sign_extension(out, in,ExtendSign);
     always@(in)
 	 begin
 		if (ExtendSign == 0) begin
-			out <= 32'h00000000 + in;
+			out <= {16'h0000 , in};
 		end else begin
-			if ((in & 16'h8000) == 16'h8000)
+			if (in[15]==1)
 			begin
-			  out <= 32'hffff0000 + in;
+			  out <= {16'hffff , in};
 			end
 			else 
 			begin

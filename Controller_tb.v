@@ -7,11 +7,11 @@
 // Design Name: 
 // Module Name:    Controller_tb 
 // Project Name: 
-// Target Devices:
+// Target Devices: 
 // Tool versions: 
-// Description:
+// Description: 
 //
-// Dependencies:
+// Dependencies: 
 //
 // Revision: 
 // Revision 0.01 - File Created
@@ -30,7 +30,7 @@ module Controller_tb(
 		forever #10 Clk <= ~Clk;
 		
 		
-		# 500;
+		# 500; 
 	end
 
 
