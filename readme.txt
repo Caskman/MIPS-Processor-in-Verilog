@@ -10,11 +10,11 @@ sltu
 sltiu
 lui // tested
 lb // tested
-lbu
-lh
-lhu
-sb
-sh
+lbu // tested
+lh // tested
+lhu // tested
+sb // tested
+sh // tested
 seh
 seb
 sra // tested
