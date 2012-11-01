@@ -25,7 +25,7 @@ module Controller(Clk);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction[15:11],5'd31,5'h0,RegDst);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1,ReadData2,Extended15to0Inst,32'b0,ALUASrc);
-	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,Instruction[10:6],ReadData1,32'd16,{Instruction[21],Instruction[10:6]},{Instruction[6],ReadData1[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc);
+	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,{27'd0,Instruction[10:6]},ReadData1,32'd16,{26'd0,Instruction[21],Instruction[10:6]},{26'd0,Instruction[6],ReadData1[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct,ReadData1,32'd0,RegDataSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
 

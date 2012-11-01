@@ -17,7 +17,7 @@ sb
 sh
 seh
 seb
-sra
-srav
+sra // tested
+srav // tested
 srl
 srlv
