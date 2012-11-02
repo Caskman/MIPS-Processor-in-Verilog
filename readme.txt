@@ -2,8 +2,8 @@ all instructions implemented
 all branches tested
 all adds tested
 to test:
-rotr
-rotrv
+rotr // tested
+rotrv // tested
 xori // tested
 slti // tested
 sltu
@@ -19,5 +19,5 @@ seh
 seb
 sra // tested
 srav // tested
-srl
-srlv
+srl // tested
+srlv // tested

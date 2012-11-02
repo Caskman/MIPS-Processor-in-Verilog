@@ -114,7 +114,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end
 				ALUResult <= temp;
 			end
-			13: begin // ROTR & SRL
+			13: begin // ROTR(V) & SRL(V)
 				y = A;
 				for (i = B[4:0];i > 0; i = i - 1) begin
 					if (B[5] == 1)
