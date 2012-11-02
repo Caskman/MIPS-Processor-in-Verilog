@@ -85,6 +85,7 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 		Registers[24] <= 32'h00000000;
 		Registers[25] <= 32'h00000000;
 		Registers[29] <= 32'd252; // this value should point to the top of data memory, dont forget byte addressing
+		Registers[31] <= 32'b0;
 	end
 	
 	

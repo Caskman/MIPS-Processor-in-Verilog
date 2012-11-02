@@ -427,7 +427,7 @@ module Controller(Clk);
 					BranchNotEqual <= 1;
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
-					ExtendSign <= 0;
+					ExtendSign <= 1;
 					RegWriteSel <= 0;
 				end
 				28: begin // MUL 
