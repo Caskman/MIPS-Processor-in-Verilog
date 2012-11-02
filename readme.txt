@@ -6,8 +6,8 @@ rotr // tested
 rotrv // tested
 xori // tested
 slti // tested
-sltu
-sltiu
+sltu // tested
+sltiu // tested
 lui // tested
 lb // tested
 lbu // tested

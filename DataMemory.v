@@ -37,7 +37,7 @@ module DataMemory(Address, WriteData, Clk, MemWrite, MemRead, ReadData,BHW,Exten
 
     output reg[31:0] ReadData; // Contents of memory location at Address
 
-    reg 	[31:0] 	Memory[0:15];	// stack pointer initialization depends on this
+    reg 	[31:0] 	Memory[0:63];	// stack pointer initialization depends on this
       
    		always 	@(posedge Clk)		   //Memory write
    		begin

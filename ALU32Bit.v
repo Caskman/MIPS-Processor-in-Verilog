@@ -114,7 +114,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end
 				ALUResult <= temp;
 			end
-			13: begin // ROTR(V) & SRL(V)
+			13: begin // ROTR & SRL
 				y = A;
 				for (i = B[4:0];i > 0; i = i - 1) begin
 					if (B[5] == 1)
@@ -129,11 +129,25 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			14: // SLTU
 				ALUResult <= A < B;
 			5: begin // Sign Extension
-				if (B == 0) begin // Byte
-					ALUResult <= {A[7],24'b0,A[6:0]};
+				if (B == 0) begin // Byte	
+					if (A[7]==1)
+					begin
+						ALUResult  <= {24'hffffff , A};
+					end
+					else 
+					begin
+						ALUResult <= A;
+					end					
 				end else if (B == 1) begin // Half word
-					ALUResult <= {A[15],16'b0,A[14:0]};
-				end
+					if (A[15]==1)
+					begin
+						ALUResult <= {16'hffff , A};
+					end
+					else 
+					begin
+						ALUResult <= A;
+					end
+				end					
 			end
 			15: begin // SRA
 				y = A;
