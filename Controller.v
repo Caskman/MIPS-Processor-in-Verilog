@@ -37,12 +37,15 @@ module Controller(Clk);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2,Extended15to0Inst,32'd0,32'd1,{27'd0,Instruction_ID[10:6]},ReadData1,32'd16,{26'd0,Instruction_ID[21],Instruction_ID[10:6]},{26'd0,Instruction_ID[6],ReadData1[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct_ID,ReadData1,32'd0,RegDataSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
+	
 	EX_MEM_Reg EX_MEM_Reg(Clk,Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDataSel_EX,RegDst_EX,RegWriteSel_EX,MemToReg_EX,
 						ALUResult_EX,Zero_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
 						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDataSel_MEM,RegDst_MEM,RegWriteSel_MEM,
 						MemToReg_MEM,ALUResult_MEM,Zero_MEM);
+						
 	if_id_reg  IF_ID_REG(Clk,Reset,NextInstruct_IF,Instruction_IF,Instruction_ID,NextInstruct_ID);
+	
 	ID_EX_REG  id_ex_reg(MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
 						BranchNotEqual,BraqnchEqual,RegDst,ALUASrc,RegDataSel,BHW,ALUBSrc,ALUControl,ReadRegister1, 
 						ReadRegister2,Instruction_ID,Extended15to0Inst,Clk, Reset,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
