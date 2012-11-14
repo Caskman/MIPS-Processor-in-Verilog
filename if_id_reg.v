@@ -26,17 +26,18 @@ module if_id_reg(clk,rst,pc_in,instruction_in,instruction_out,pc_out);
 	 output [31:0] instruction_out, pc_out;
 	 reg [31:0] instruction_out, pc_out;
 
-always@(rst)
-begin
-	instruction_out <= 32'b0;
-	pc_out <= 32'b0;
-end
+	 
+	always@(rst)
+	begin
+		instruction_out <= 32'b0;
+		pc_out <= 32'b0;
+	end
 
-always@(posedge clk)
-begin
-	instruction_out <= instruction_in;
-	pc_out <= pc_in;
-end
+	always@(posedge clk)
+	begin
+		instruction_out <= instruction_in;
+		pc_out <= pc_in;
+	end
 	 
 
 

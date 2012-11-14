@@ -29,7 +29,7 @@ module Controller(Clk);
 	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst,BranchOutTotal,Instruction_ID[25:0],Jump,NextInstruct_IF,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
-	DataMemory DMem(ALUResult, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
+	DataMemory DMem(ALUResult_MEM, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
 	sign_extension InstExtend(Extended15to0Inst,Instruction_ID[15:0],ExtendSign);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction_ID[15:11],5'd31,5'h0,RegDst);
