@@ -4,7 +4,7 @@ module Controller(Clk);
 	
 	input Clk;
 	wire [31:0]  WriteDataToMem,Instruction_IF,Instruction_ID,WriteDataToReg,ReadData1,MemToRegData,NextInstruct_IF,NextInstruct_ID;
-	wire [31:0] ReadData2,ALUResult,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
+	wire [31:0] ReadData2,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl,ALUBSrc;
@@ -15,10 +15,10 @@ module Controller(Clk);
 	wire MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,MemtoReg_EX,DataMemExtendSign_EX;
 	wire BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BraqnchEqual_EX;
 	wire [1:0] RegDest_EX,ALUASrc_EX,RegDataSel_EX,BHW_EX;
-   wire [3:0] ALUBSrc_EX,ALUControl_EX;
+	wire [3:0] ALUBSrc_EX,ALUControl_EX;
 	wire [31:0] ReadData1_EX, ReadData2_EX;
 	wire [31:0] Instruction_EX,Extended15to0Inst_EX;
-	wire [31:0] ALUResult_WB,Instruction_WB,ReadDataFromMem_WB;
+	wire [31:0] ALUResult_WB,ALUResult_EX,Instruction_WB,ReadDataFromMem_WB;
 	wire  MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,Zero_WB;
 	wire [1:0] RegDst_WB,RegDataSel_WB;
 	wire [31:0] ReadData1_WB;
@@ -27,9 +27,9 @@ module Controller(Clk);
 		Reset <= 0;
 	end
 	
-	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst,BranchOutTotal,Instruction_ID[25:0],Jump,NextInstruct_IF,ReadData1,JumpSel);
+	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,NextInstruct_IF,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
-	ALU32Bit ALU(ALUControl, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
+	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
 	DataMemory DMem(ALUResult_MEM, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
 	sign_extension InstExtend(Extended15to0Inst,Instruction_ID[15:0],ExtendSign);
 	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
@@ -38,21 +38,22 @@ module Controller(Clk);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2_EX,Extended15to0Inst_EX,32'd0,32'd1,{27'd0,Instruction_EX[10:6]},ReadData1_EX,32'd16,{26'd0,Instruction_EX[21],Instruction_EX[10:6]},{26'd0,Instruction_EX[6],ReadData1_EX[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc_EX);
 	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct_ID,ReadData1,32'd0,RegDataSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
+						
+	if_id_reg  IF_ID_REG(Clk,Reset,NextInstruct_IF,Instruction_IF,Instruction_ID,NextInstruct_ID);
 	
+	ID_EX_REG  id_ex_reg(MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
+						BranchNotEqual,BranchEqual,RegDst,ALUASrc,RegDataSel,BHW,ALUBSrc,ALUControl,ReadData1, 
+						ReadData2,Instruction_ID,Extended15to0Inst,Clk, Reset,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
+						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BraqnchEqual_EX,
+						RegDest_EX,ALUASrc_EX,RegDataSel_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
+						Instruction_EX,Extended15to0Inst_EX);
+						
 	EX_MEM_Reg EX_MEM_Reg(Clk,Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDataSel_EX,RegDst_EX,RegWriteSel_EX,MemToReg_EX,
 						ALUResult_EX,Zero_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
 						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDataSel_MEM,RegDst_MEM,RegWriteSel_MEM,
 						MemToReg_MEM,ALUResult_MEM,Zero_MEM);
 						
-	if_id_reg  IF_ID_REG(Clk,Reset,NextInstruct_IF,Instruction_IF,Instruction_ID,NextInstruct_ID);
-	
-	ID_EX_REG  id_ex_reg(MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
-						BranchNotEqual,BraqnchEqual,RegDst,ALUASrc,RegDataSel,BHW,ALUBSrc,ALUControl,ReadData1, 
-						ReadData2,Instruction_ID,Extended15to0Inst,Clk, Reset,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
-						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BraqnchEqual_EX,
-						RegDest_EX,ALUASrc_EX,RegDataSel_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
-						Instruction_EX,Extended15to0Inst_EX);
 	MEM_WB_REG mem_wb_reg(ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM,Clk, Reset, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
 						ALUResult_WB,Instruction_WB,ReadDataFromMem_WB,Clk, Reset, MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,
 						ReadData1_MEM,Zero_MEM,RegDst_MEM,RegDataSel_MEM,ReadData1_WB,RegDst_WB,RegDataSel_WB,Zero_WB);					
@@ -60,10 +61,10 @@ module Controller(Clk);
 	assign ReadRegister1 = Instruction_ID[25:21];// rs
 	assign ReadRegister2 = Instruction_ID[20:16];// rt
 	assign WriteDataToMem = ReadData2;
-	assign BranchOut1 = BranchEqual & Zero; // Represents AND gate
-	assign BranchOut2 = BranchNotEqual & (~Zero);
-	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult[0];
-	assign BranchOut4 = BranchBGEZ & ~(ALUResult[0]);
+	assign BranchOut1 = BranchEqual & Zero_EX; // Represents AND gate
+	assign BranchOut2 = BranchNotEqual & (~Zero_EX);
+	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult_EX[0];
+	assign BranchOut4 = BranchBGEZ & ~(ALUResult_EX[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
 	 
  
