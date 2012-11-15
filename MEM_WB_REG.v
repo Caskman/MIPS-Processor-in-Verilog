@@ -19,8 +19,8 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module MEM_WB_REG(ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM,Clk, Reset, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
-						ALUResult_WB,Instruction_WB,ReadDataFromMem_WB,Clk, Reset, MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,
+module MEM_WB_REG(Clk, Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
+						ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,
 						ReadData1_MEM,Zero_MEM,RegDst_MEM,RegDataSel_MEM,ReadData1_WB,RegDst_WB,RegDataSel_WB,Zero_WB);
 	 
 	 input [31:0] ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM;
@@ -40,7 +40,16 @@ module MEM_WB_REG(ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM,Clk, Reset, 
 	 
 always@(Reset)
 begin
-	Instruction_WB <= 32'b0;
+	ALUResult_WB			<=  0;
+	Instruction_WB			<=  0;
+	ReadDataFromMem_WB   <=  0;
+	MemtoReg_WB				<=  0;
+	RegWrite_WB				<=  0;
+	RegWriteSel_WB			<=  0;
+   RegDst_WB				<=  0;
+   RegDataSel_WB			<=  0;
+	Zero_WB					<=  0;
+	ReadData1_WB			<=  0;
 end
 
 always@(posedge Clk)
