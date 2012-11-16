@@ -1,27 +1,29 @@
 module Controller(Clk);
-	
-	
-	
 	input Clk;
 	wire [31:0]  WriteDataToMem,Instruction_IF,Instruction_ID,WriteDataToReg,ReadData1,MemToRegData,NextInstruct_IF,NextInstruct_ID;
 	wire [31:0] ReadData2,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl,ALUBSrc;
-	reg [1:0] RegDst,RegDataSel,ALUASrc,BHW;
-	reg MemtoReg,MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
+	reg [1:0] RegDst,ALUASrc,BHW,MemtoReg;
+	reg MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
 	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel,DataMemExtendSign;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
-	wire MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,MemtoReg_EX,DataMemExtendSign_EX;
+	wire MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,DataMemExtendSign_EX;
 	wire BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BranchEqual_EX;
-	wire [1:0] RegDest_EX,ALUASrc_EX,RegDataSel_EX,BHW_EX;
+	wire [1:0] RegDest_EX,ALUASrc_EX,BHW_EX,MemtoReg_EX;
 	wire [3:0] ALUBSrc_EX,ALUControl_EX;
 	wire [31:0] ReadData1_EX, ReadData2_EX;
 	wire [31:0] Instruction_EX,Extended15to0Inst_EX;
 	wire [31:0] ALUResult_WB,ALUResult_EX,Instruction_WB,ReadDataFromMem_WB;
 	wire  MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,Zero_WB;
-	wire [1:0] RegDst_WB,RegDataSel_WB;
+	wire [1:0] RegDst_WB;
 	wire [31:0] ReadData1_WB;
+	wire MemRead_MEM,MemWrite_MEM,DataMemExtendSign_MEM,RegWrite_MEM,RegWriteSel_MEM,MemToReg_MEM,Zero_MEM;
+	wire [1:0] BHW_MEM,RegDst_MEM;
+	wire [31:0] ReadData1_MEM,ALUResult_MEM;
+
+
 	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset,JumpFlush,BranchFlush,BranchFlush_EX;
 	 
 	initial begin
@@ -33,31 +35,31 @@ module Controller(Clk);
 	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
 	DataMemory DMem(ALUResult_MEM, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
 	sign_extension InstExtend(Extended15to0Inst,Instruction_ID[15:0],ExtendSign);
-	mux_2to1_32bit WriteDataRegInputMux(MemToRegData, ALUResult, ReadDataFromMem, MemtoReg);
+	mux_4to1_32bit RegDataMux(WriteDataToReg, ALUResult_WB, ReadDataFromMem_WB,NextInstruct_WB,ReadData1_WB, MemtoReg_WB);
 	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction_ID[15:11],5'd31,5'h0,RegDst);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1_EX,ReadData2_EX,Extended15to0Inst_EX,32'b0,ALUASrc_EX);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2_EX,Extended15to0Inst_EX,32'd0,32'd1,{27'd0,Instruction_EX[10:6]},ReadData1_EX,32'd16,{26'd0,Instruction_EX[21],Instruction_EX[10:6]},{26'd0,Instruction_EX[6],ReadData1_EX[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc_EX);
-	mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct_ID,ReadData1,32'd0,RegDataSel);
-	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite,Zero,RegWriteSel);
+	//mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct_ID,ReadData1,32'd0,RegDataSel);
+	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite_WB,Zero_WB,RegWriteSel_WB);
 						
 	if_id_reg  IF_ID_REG(Clk,ID_ID_Reset,NextInstruct_IF,Instruction_IF,Instruction_ID,NextInstruct_ID);
 	
 	ID_EX_REG  id_ex_reg(Clk, ID_EX_Reset,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
-						BranchNotEqual,BranchEqual,RegDst,ALUASrc,RegDataSel,BHW,ALUBSrc,ALUControl,ReadData1, 
+						BranchNotEqual,BranchEqual,RegDst,ALUASrc,BHW,ALUBSrc,ALUControl,ReadData1, 
 						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
 						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BraqnchEqual_EX,
-						RegDest_EX,ALUASrc_EX,RegDataSel_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
+						RegDest_EX,ALUASrc_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
 						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX);
 						
 	EX_MEM_Reg EX_MEM_Reg(Clk,EX_MEM_Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
-						ReadData2_EX,RegWrite_EX,RegDataSel_EX,RegDst_EX,RegWriteSel_EX,MemToReg_EX,
+						ReadData2_EX,RegWrite_EX,RegDst_EX,RegWriteSel_EX,MemToReg_EX,
 						ALUResult_EX,Zero_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
-						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDataSel_MEM,RegDst_MEM,RegWriteSel_MEM,
+						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDst_MEM,RegWriteSel_MEM,
 						MemToReg_MEM,ALUResult_MEM,Zero_MEM);
 						
 	MEM_WB_REG mem_wb_reg(Clk, MEM_WB_Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
-						ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,
-						ReadData1_MEM,Zero_MEM,RegDst_MEM,RegDataSel_MEM,ReadData1_WB,RegDst_WB,RegDataSel_WB,Zero_WB);					
+						ReadData1_MEM,Zero_MEM,RegDst_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
+						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB);					
 
 	assign ReadRegister1 = Instruction_ID[25:21];// rs
 	assign ReadRegister2 = Instruction_ID[20:16];// rt
@@ -93,7 +95,6 @@ module Controller(Clk);
 //			BranchFlush <= 0;
 //			RegWrite <= 0;
 //			RegWriteSel <= 0;
-//			RegDataSel <= 0;
 //			RegDst <= 0;
 //			BHW <= 0;
 //			DataMemExtendSign <= 0;
@@ -112,7 +113,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						33: begin // ADDU
 							ALUControl <= 2;
@@ -122,7 +124,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						36:begin // AND
 							ALUControl <= 0;
@@ -132,7 +135,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						37: begin // OR
 							ALUControl <= 1;
@@ -142,7 +146,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						34:begin // SUB
 							ALUControl <= 6;
@@ -152,7 +157,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						42:begin // SLT
 							ALUControl <= 7;
@@ -162,7 +168,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						39: begin // NOR
 							ALUControl <= 3;
@@ -172,7 +179,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						0: begin // SLL
 							ALUControl <= 10;
@@ -182,7 +190,8 @@ module Controller(Clk);
 							Jump <= 0;
 							JumpFlush <= 0;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						8: begin // JR
 							Jump <= 1;
@@ -190,15 +199,17 @@ module Controller(Clk);
 							JumpFlush <= 1;
 							RegWrite <= 0;
 							RegWriteSel <= 0;
+							MemtoReg <= 0;
 						end
 						10: begin // MOVZ
 							Jump <= 0;
 							JumpFlush <= 0;
-							ALUBSrc <= 2;
+							MemtoReg <= 3;
 							ALUControl <= 6;
 							ALUASrc <= 1;
-							RegDataSel <= 2;
+							ALUBSrc <= 2;
 							RegWriteSel <= 1;
+							//RegDataSel <= 2;
 						end
 						2: begin // ROTR & SRL
 							Jump <= 0;
@@ -208,7 +219,8 @@ module Controller(Clk);
 							ALUBSrc <= 7;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						6: begin // ROTRV & SRLV
 							Jump <= 0;
@@ -218,7 +230,8 @@ module Controller(Clk);
 							ALUBSrc <= 8;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						38: begin // XOR
 							Jump <= 0;
@@ -228,7 +241,8 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						4: begin // SLLV
 							Jump <= 0;
@@ -238,7 +252,8 @@ module Controller(Clk);
 							ALUBSrc <= 4;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						35: begin // SUBU
 							Jump <= 0;
@@ -248,25 +263,20 @@ module Controller(Clk);
 							ALUBSrc <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
+							MemtoReg <= 0;
 						end
 						43: begin // SLTU
 							Jump <= 0;
 							JumpFlush <= 0;
-							MemRead <= 0;
-							MemtoReg <= 0;
-							MemWrite <= 0;
 							ALUControl <= 14;
 							ALUASrc <= 0;
 							ALUBSrc <= 0;
-							BranchEqual <= 0;
-							BranchNotEqual <= 0;
-							BranchBLTZ_BGTZ <= 0;
-							BranchBGEZ <= 0;
 							RegWrite <= 1;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
 							RegDst <= 1;
 							RegWriteSel <= 0;
+							MemtoReg <= 0;
 						end
 						3: begin // SRA
 							Jump <= 0;
@@ -276,6 +286,7 @@ module Controller(Clk);
 							ALUBSrc <= 4;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
+							MemtoReg <= 0;
 						end
 						7: begin // SRAV
 							Jump <= 0;
@@ -285,6 +296,7 @@ module Controller(Clk);
 							ALUBSrc <= 5;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
+							MemtoReg <= 0;
 						end
 						default:
 						RegWrite <= 0;
@@ -292,7 +304,6 @@ module Controller(Clk);
 					endcase
 					RegDst <= 1;
 					MemRead <= 0;
-					MemtoReg <= 0;
 					MemWrite <= 0;
 					BranchEqual <= 0;
 					BranchNotEqual <= 0;
@@ -316,7 +327,7 @@ module Controller(Clk);
 							ALUBSrc <= 3;
 							BranchBLTZ_BGTZ <= 0;
 							BranchBGEZ <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
 						end
 						32: begin // CLZ
 							Jump <= 0;
@@ -332,7 +343,7 @@ module Controller(Clk);
 							ALUBSrc <= 2;
 							BranchBLTZ_BGTZ <= 0;
 							BranchBGEZ <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
 						end
 					endcase
 					RegWriteSel <= 0;
@@ -349,7 +360,7 @@ module Controller(Clk);
 					MemWrite <= 0;
 					ALUBSrc <= 1;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					ALUControl <= 2;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
@@ -369,7 +380,7 @@ module Controller(Clk);
 					MemWrite <= 0;
 					ALUBSrc <= 1;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					ALUControl <= 2;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
@@ -389,7 +400,7 @@ module Controller(Clk);
 					MemWrite <= 0;
 					ALUBSrc <= 1;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					ALUControl <= 0;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
@@ -410,7 +421,7 @@ module Controller(Clk);
 					ALUASrc <= 0;
 					ALUBSrc <= 1;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					ALUControl <= 1;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
@@ -460,7 +471,7 @@ module Controller(Clk);
 					ALUASrc <= 0;
 					ALUBSrc <= 1;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					ALUControl <= 2;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
@@ -516,7 +527,7 @@ module Controller(Clk);
 					ALUASrc <= 0;
 					ALUBSrc <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					ALUControl <= 9;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
@@ -571,15 +582,16 @@ module Controller(Clk);
 					JumpSel <= 0;
 					JumpFlush <= 1;
 					RegDst <= 2;
-					BranchEqual <= 0;
 					MemRead <= 0;
 					MemWrite <= 0;
+					MemtoReg <= 2;
 					RegWrite <= 1;
+					BranchEqual <= 0;
 					BranchNotEqual <= 0;
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					BranchFlush <= 0;
-					RegDataSel <= 1;
+					//RegDataSel <= 1;
 					RegWriteSel <= 0;
 				end
 				14: begin // XORI
@@ -597,7 +609,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					BranchFlush <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 0;
@@ -617,7 +629,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					BranchFlush <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 1;
@@ -637,7 +649,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					BranchFlush <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 0;
@@ -657,7 +669,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					BranchFlush <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 0;
@@ -677,7 +689,7 @@ module Controller(Clk);
 					BranchBGEZ <= 0;
 					BranchFlush <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 1;
@@ -698,7 +710,7 @@ module Controller(Clk);
 					BranchBLTZ_BGTZ <= 0;
 					BranchBGEZ <= 0;
 					RegWrite <= 1;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					RegWriteSel <= 0;
 					ExtendSign <= 1;
@@ -723,7 +735,7 @@ module Controller(Clk);
 					BranchFlush <= 0;
 					RegWrite <= 1;
 					RegWriteSel <= 0;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					BHW <= 1;
 					DataMemExtendSign <= 1;
@@ -745,7 +757,7 @@ module Controller(Clk);
 					BranchFlush <= 0;
 					RegWrite <= 1;
 					RegWriteSel <= 0;
-					RegDataSel <= 0;
+					//RegDataSel <= 0;
 					RegDst <= 0;
 					BHW <= 1;
 					DataMemExtendSign <= 0;
@@ -804,7 +816,7 @@ module Controller(Clk);
 							BranchBGEZ <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
 							RegDst <= 1;
 						end
 						24: begin // SEH
@@ -821,7 +833,7 @@ module Controller(Clk);
 							BranchBGEZ <= 0;
 							RegWrite <= 1;
 							RegWriteSel <= 0;
-							RegDataSel <= 0;
+							//RegDataSel <= 0;
 							RegDst <= 1;
 						end
 					endcase
@@ -849,7 +861,7 @@ module Controller(Clk);
 			BranchFlush <= 0;
 			RegWrite <= 0;
 			RegWriteSel <= 0;
-			RegDataSel <= 0;
+			//RegDataSel <= 0;
 			RegDst <= 0;
 			BHW <= 0;
 			DataMemExtendSign <= 0;

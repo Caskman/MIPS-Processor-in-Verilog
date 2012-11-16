@@ -20,22 +20,23 @@
 //
 //////////////////////////////////////////////////////////////////////////////////
 module MEM_WB_REG(Clk, Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
+						ReadData1_MEM,Zero_MEM,RegDst_MEM,
 						ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,
-						ReadData1_MEM,Zero_MEM,RegDst_MEM,RegDataSel_MEM,ReadData1_WB,RegDst_WB,RegDataSel_WB,Zero_WB);
+						ReadData1_WB,RegDst_WB,Zero_WB);
 	 
 	 input [31:0] ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM;
 	 input Clk, Reset, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,Zero_MEM;
-	 input [1:0] RegDst_MEM,RegDataSel_MEM;
+	 input [1:0] RegDst_MEM;
 	 input [31:0] ReadData1_MEM;	 
  	
 	 output [31:0] ALUResult_WB,Instruction_WB,ReadDataFromMem_WB;
 	 output MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,Zero_WB;
-	 output [1:0] RegDst_WB,RegDataSel_WB;
+	 output [1:0] RegDst_WB;
 	 output [31:0] ReadData1_WB;	 
 	 
 	 reg [31:0] ALUResult_WB,Instruction_WB,ReadDataFromMem_WB;
 	 reg  MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,Zero_WB;
-	 reg [1:0] RegDst_WB,RegDataSel_WB;
+	 reg [1:0] RegDst_WB;
 	 reg [31:0] ReadData1_WB;	
 	 
 always@(Reset)
@@ -47,7 +48,6 @@ begin
 	RegWrite_WB				<=  0;
 	RegWriteSel_WB			<=  0;
    RegDst_WB				<=  0;
-   RegDataSel_WB			<=  0;
 	Zero_WB					<=  0;
 	ReadData1_WB			<=  0;
 end
@@ -61,7 +61,6 @@ begin
 	RegWrite_WB				<=  RegWrite_MEM;
 	RegWriteSel_WB			<=  RegWriteSel_MEM;
    RegDst_WB				<=  RegDst_MEM;
-   RegDataSel_WB			<=  RegDataSel_MEM;
 	Zero_WB					<=  Zero_MEM;
 	ReadData1_WB			<=  ReadData1_MEM;
 end
