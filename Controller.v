@@ -65,10 +65,10 @@ module Controller(Clk);
 	assign ReadRegister1 = Instruction_ID[25:21];// rs
 	assign ReadRegister2 = Instruction_ID[20:16];// rt
 	assign WriteDataToMem = ReadData2;
-	assign BranchOut1 = BranchEqual & Zero_EX; // Represents AND gate
-	assign BranchOut2 = BranchNotEqual & (~Zero_EX);
-	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult_EX[0];
-	assign BranchOut4 = BranchBGEZ & ~(ALUResult_EX[0]);
+	assign BranchOut1 = BranchEqual_EX & Zero_EX; // Represents AND gate
+	assign BranchOut2 = BranchNotEqual_EX & (~Zero_EX);
+	assign BranchOut3 = BranchBLTZ_BGTZ_EX & ALUResult_EX[0];
+	assign BranchOut4 = BranchBGEZ_EX & ~(ALUResult_EX[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
 	assign IF_ID_Reset = JumpFlush | (BranchFlush & BranchOutTotal) | Reset;
 	assign ID_EX_Reset = (BranchFlush & BranchOutTotal) | Reset;
