@@ -21,11 +21,12 @@ module Controller(Clk);
 	wire [31:0] ReadData1_WB;
 	wire MemRead_MEM,MemWrite_MEM,DataMemExtendSign_MEM,RegWrite_MEM,RegWriteSel_MEM,Zero_MEM;
 	wire [1:0] MemToReg_MEM,BHW_MEM,RegDst_MEM;
-	wire [31:0] ReadData1_MEM,ALUResult_MEM;
+	wire [31:0] ReadData1_MEM,ReadData2_MEM,ALUResult_MEM,Instruction_MEM;
 
 
 	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset,BranchFlush_EX;
-	 
+	
+	
 	initial begin
 		Reset <= 0;
 	end
@@ -53,11 +54,11 @@ module Controller(Clk);
 						
 	EX_MEM_Reg EX_MEM_Reg(Clk,EX_MEM_Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDst_EX,RegWriteSel_EX,MemToReg_EX,
-						ALUResult_EX,Zero_EX,NextInstruct_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
+						ALUResult_EX,Zero_EX,NextInstruct_EX,Instruction_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
 						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDst_MEM,RegWriteSel_MEM,
-						MemToReg_MEM,ALUResult_MEM,Zero_MEM,NextInstruct_MEM);
+						MemToReg_MEM,ALUResult_MEM,Zero_MEM,NextInstruct_MEM,Instruction_MEM);
 						
-	MEM_WB_REG mem_wb_reg(Clk, MEM_WB_Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
+	MEM_WB_REG mem_wb_reg(Clk, MEM_WB_Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem, MemToReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
 						ReadData1_MEM,Zero_MEM,RegDst_MEM,NextInstruct_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
 						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB,NextInstruct_WB);					
 
@@ -72,7 +73,7 @@ module Controller(Clk);
 	assign IF_ID_Reset = JumpFlush | (BranchFlush & BranchOutTotal) | Reset;
 	assign ID_EX_Reset = (BranchFlush & BranchOutTotal) | Reset;
 	assign EX_MEM_Reset = (BranchFlush & BranchOutTotal) | Reset;
-	assign MEM_WB_Reset = 0 | Reset;
+	assign MEM_WB_Reset = Reset;
 	 
  
 	always @(Instruction_ID) begin
