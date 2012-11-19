@@ -1,30 +1,30 @@
 module Controller(Clk);
 	input Clk;
-	wire [31:0]  WriteDataToMem,Instruction_IF,Instruction_ID,WriteDataToReg,ReadData1,MemToRegData,NextInstruct_IF,NextInstruct_ID;
+	wire [31:0]  WriteDataToMem,Instruction_IF,Instruction_ID,WriteDataToReg,ReadData1,MemToRegData,NextInstruct_IF,NextInstruct_ID,NextInstruct_EX,NextInstruct_MEM,NextInstruct_WB;
 	wire [31:0] ReadData2,ReadDataFromMem,Extended15to0Inst,ALUSrcInB,ALUSrcInA;
 	reg Reset,RegWrite;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg [3:0] ALUControl,ALUBSrc;
 	reg [1:0] RegDst,ALUASrc,BHW,MemtoReg;
-	reg MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
+	reg JumpFlush,BranchFlush,MemWrite,MemRead,BranchEqual,Jump,BranchNotEqual,NOOP,ExtendSign;
 	reg BranchBLTZ_BGTZ,BranchBGEZ,JumpSel,RegWriteSel,DataMemExtendSign;
 	wire Zero,BranchOut1,BranchOut2,BranchOutTotal,RegWriteOut;
 	wire MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,DataMemExtendSign_EX;
 	wire BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BranchEqual_EX;
-	wire [1:0] RegDest_EX,ALUASrc_EX,BHW_EX,MemtoReg_EX;
+	wire [1:0] MemToReg_EX,RegDst_EX,ALUASrc_EX,BHW_EX,MemtoReg_EX;
 	wire [3:0] ALUBSrc_EX,ALUControl_EX;
 	wire [31:0] ReadData1_EX, ReadData2_EX;
 	wire [31:0] Instruction_EX,Extended15to0Inst_EX;
 	wire [31:0] ALUResult_WB,ALUResult_EX,Instruction_WB,ReadDataFromMem_WB;
-	wire  MemtoReg_WB, RegWrite_WB,RegWriteSel_WB,Zero_WB;
-	wire [1:0] RegDst_WB;
+	wire   RegWrite_WB,RegWriteSel_WB,Zero_WB;
+	wire [1:0] RegDst_WB,MemtoReg_WB;
 	wire [31:0] ReadData1_WB;
-	wire MemRead_MEM,MemWrite_MEM,DataMemExtendSign_MEM,RegWrite_MEM,RegWriteSel_MEM,MemToReg_MEM,Zero_MEM;
-	wire [1:0] BHW_MEM,RegDst_MEM;
+	wire MemRead_MEM,MemWrite_MEM,DataMemExtendSign_MEM,RegWrite_MEM,RegWriteSel_MEM,Zero_MEM;
+	wire [1:0] MemToReg_MEM,BHW_MEM,RegDst_MEM;
 	wire [31:0] ReadData1_MEM,ALUResult_MEM;
 
 
-	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset,JumpFlush,BranchFlush,BranchFlush_EX;
+	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset,BranchFlush_EX;
 	 
 	initial begin
 		Reset <= 0;
@@ -46,20 +46,20 @@ module Controller(Clk);
 	
 	ID_EX_REG  id_ex_reg(Clk, ID_EX_Reset,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
 						BranchNotEqual,BranchEqual,RegDst,ALUASrc,BHW,ALUBSrc,ALUControl,ReadData1, 
-						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
+						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,NextInstruct_ID,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
 						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BraqnchEqual_EX,
-						RegDest_EX,ALUASrc_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
-						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX);
+						RegDst_EX,ALUASrc_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
+						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,NextInstruct_EX); 
 						
 	EX_MEM_Reg EX_MEM_Reg(Clk,EX_MEM_Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDst_EX,RegWriteSel_EX,MemToReg_EX,
-						ALUResult_EX,Zero_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
+						ALUResult_EX,Zero_EX,NextInstruct_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
 						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDst_MEM,RegWriteSel_MEM,
-						MemToReg_MEM,ALUResult_MEM,Zero_MEM);
+						MemToReg_MEM,ALUResult_MEM,Zero_MEM,NextInstruct_MEM);
 						
 	MEM_WB_REG mem_wb_reg(Clk, MEM_WB_Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
-						ReadData1_MEM,Zero_MEM,RegDst_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
-						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB);					
+						ReadData1_MEM,Zero_MEM,RegDst_MEM,NextInstruct_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
+						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB,NextInstruct_WB);					
 
 	assign ReadRegister1 = Instruction_ID[25:21];// rs
 	assign ReadRegister2 = Instruction_ID[20:16];// rt
@@ -69,10 +69,10 @@ module Controller(Clk);
 	assign BranchOut3 = BranchBLTZ_BGTZ & ALUResult_EX[0];
 	assign BranchOut4 = BranchBGEZ & ~(ALUResult_EX[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
-	assign IF_ID_Reset = JumpFlush | (BranchFlush & BranchTotal);
-	assign ID_EX_Reset = (BranchFlush & BranchTotal);
-	assign EX_MEM_Reset = (BranchFlush & BranchTotal);
-	assign MEM_WB_Reset = 0;
+	assign IF_ID_Reset = JumpFlush | (BranchFlush & BranchOutTotal) | Reset;
+	assign ID_EX_Reset = (BranchFlush & BranchOutTotal) | Reset;
+	assign EX_MEM_Reset = (BranchFlush & BranchOutTotal) | Reset;
+	assign MEM_WB_Reset = 0 | Reset;
 	 
  
 	always @(Instruction_ID) begin
