@@ -21,9 +21,9 @@
 module Controller_tb(
      );
 
-	reg Clk;
+	reg Clk,Reset;
 
-	Controller c(Clk);
+	Controller c(Clk,Reset);
 	
 	initial begin
 		Clk <= 1'b0;
@@ -31,6 +31,14 @@ module Controller_tb(
 		
 		
 		# 500; 
+	end
+	
+	initial begin
+		Reset <= 1;
+		
+		#20;
+		
+		Reset <= 0;
 	end
 
 
