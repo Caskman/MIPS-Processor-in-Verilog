@@ -9,9 +9,11 @@ module Controller(Clk,Reset);
 	
 	wire [31:0] ReadData1,ReadData1_EX,ReadData1_MEM,ReadData1_WB;
 	wire [31:0] ReadData2,ReadData2_EX,ReadData2_MEM;
+	wire [31:0] ReadData1Final,ReadData2Final;
+	wire [1:0] ReadData1Sel,ReadData2Sel;
 	reg RegWrite;
 	wire RegWrite_EX,RegWrite_MEM,RegWrite_WB;
-	wire RegWriteOut;
+	wire RegWriteFinal_MEM,RegWriteFinal_WB;
 	reg [1:0] RegDst;
 	wire [1:0] RegDst_EX,RegDst_MEM,RegDst_WB;
 	reg RegWriteSel;
@@ -49,6 +51,7 @@ module Controller(Clk,Reset);
 	wire DataMemExtendSign_EX,DataMemExtendSign_MEM;
 	wire [31:0] WriteDataToMem;
 	wire [31:0] ReadDataFromMem,ReadDataFromMem_WB;
+	wire [31:0] RegData_MEM;
 	
 	reg JumpFlush,Jump,NOOP,ExtendSign;
 	reg JumpSel;
@@ -58,20 +61,28 @@ module Controller(Clk,Reset);
 	
 	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF);
 	// InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,PCNext4_IF,ReadData1,JumpSel);
-	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegAddress_WB,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
+	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegAddress_WB,WriteDataToReg,RegWriteFinal_WB,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
 	DataMemory DMem(ALUResult_MEM, ReadData2_MEM, Clk, MemWrite_MEM, MemRead_MEM, ReadDataFromMem,BHW_MEM,DataMemExtendSign_MEM);
 	sign_extension InstExtend(Extended15to0Inst,Instruction_ID[15:0],ExtendSign);
 	mux_4to1_32bit RegDataMux(WriteDataToReg, ALUResult_WB, ReadDataFromMem_WB,PCNext4_WB,ReadData1_WB, MemtoReg_WB);
 	mux_4to1_5bit WriteRegAddressMux(WriteRegAddress,Instruction_ID[20:16],Instruction_ID[15:11],5'd31,5'h0,RegDst);
-	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1_EX,ReadData2_EX,Extended15to0Inst_EX,32'b0,ALUASrc_EX);
-	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2_EX,Extended15to0Inst_EX,32'd0,32'd1,{27'd0,Instruction_EX[10:6]},ReadData1_EX,32'd16,{26'd0,Instruction_EX[21],Instruction_EX[10:6]},{26'd0,Instruction_EX[6],ReadData1_EX[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc_EX);
+	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1Final,ReadData2Final,Extended15to0Inst_EX,32'b0,ALUASrc_EX);
+	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2Final,Extended15to0Inst_EX,32'd0,32'd1,{27'd0,Instruction_EX[10:6]},
+									ReadData1Final,32'd16,{26'd0,Instruction_EX[21],Instruction_EX[10:6]},
+									{26'd0,Instruction_EX[6],ReadData1Final[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc_EX);
 	//mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,PCNext4_ID,ReadData1,32'd0,RegDataSel);
-	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite_WB,Zero_WB,RegWriteSel_WB);
+	mux_2to1_1bit RegWriteMux(RegWriteFinal_WB,RegWrite_WB,Zero_WB,RegWriteSel_WB);
 	
 	mux_2to1_32bit JumpOrBranchMux(PCTarget,JumpTarget,BranchTarget,Branch);
 	mux_2to1_32bit jumpsel(JumpTarget, {PCNow_ID[31:26],(Instruction_ID[25:0]<<2)}, ReadData1, JumpSel);
-
+	
+	ForwardingControl forward(Instruction_EX[25:21],Instruction_EX[20:16],RegWriteFinal_MEM,WriteRegAddress_MEM,
+								RegWriteFinal_WB,WriteRegAddress_WB,ReadData1Sel,ReadData2Sel);
+	mux_4to1_32bit ReadData1SelMux(ReadData1Final,ReadData1_EX,RegData_MEM,WriteDataToReg,32'b0,ReadData1Sel);
+	mux_4to1_32bit ReadData2SelMux(ReadData2Final,ReadData2_EX,RegData_MEM,WriteDataToReg,32'b0,ReadData2Sel);
+	mux_4to1_32bit RegDataMux_MEM(RegData_MEM,ALUResult_MEM,ReadDataFromMem,PCNext4_MEM,ReadData1_MEM,MemtoReg_MEM);
+	mux_2to1_1bit RegWriteMux_MEM(RegWriteFinal_MEM,RegWrite_MEM,Zero_MEM,RegWriteSel_MEM);
 
 	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,Instruction_IF,PCNow_IF,PCNext4_IF,Instruction_ID,PCNow_ID,PCNext4_ID);
 	
