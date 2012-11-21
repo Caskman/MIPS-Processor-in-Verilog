@@ -19,6 +19,7 @@ module Controller(Clk,Reset);
 	wire [31:0] WriteDataToReg;
 	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	wire [31:0] Extended15to0Inst,Extended15to0Inst_EX;
+	wire [4:0] WriteRegAddress,WriteRegAddress_EX,WriteRegAddress_MEM,WriteRegAddress_WB;
 	
 	reg [3:0] ALUControl;
 	wire [3:0] ALUControl_EX;
@@ -57,12 +58,12 @@ module Controller(Clk,Reset);
 	
 	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF);
 	// InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,PCNext4_IF,ReadData1,JumpSel);
-	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
+	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegAddress_WB,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
 	DataMemory DMem(ALUResult_MEM, ReadData2_MEM, Clk, MemWrite_MEM, MemRead_MEM, ReadDataFromMem,BHW_MEM,DataMemExtendSign_MEM);
 	sign_extension InstExtend(Extended15to0Inst,Instruction_ID[15:0],ExtendSign);
 	mux_4to1_32bit RegDataMux(WriteDataToReg, ALUResult_WB, ReadDataFromMem_WB,PCNext4_WB,ReadData1_WB, MemtoReg_WB);
-	mux_4to1_5bit WriteRegInputMux(WriteRegister,Instruction_WB[20:16],Instruction_WB[15:11],5'd31,5'h0,RegDst_WB);
+	mux_4to1_5bit WriteRegAddressMux(WriteRegAddress,Instruction_ID[20:16],Instruction_ID[15:11],5'd31,5'h0,RegDst);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1_EX,ReadData2_EX,Extended15to0Inst_EX,32'b0,ALUASrc_EX);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2_EX,Extended15to0Inst_EX,32'd0,32'd1,{27'd0,Instruction_EX[10:6]},ReadData1_EX,32'd16,{26'd0,Instruction_EX[21],Instruction_EX[10:6]},{26'd0,Instruction_EX[6],ReadData1_EX[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc_EX);
 	//mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,PCNext4_ID,ReadData1,32'd0,RegDataSel);
@@ -76,20 +77,20 @@ module Controller(Clk,Reset);
 	
 	ID_EX_REG  id_ex_reg(Clk, ID_EX_Reset,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
 						BranchNotEqual,BranchEqual,RegDst,ALUASrc,BHW,ALUBSrc,ALUControl,ReadData1, 
-						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,PCNow_ID,PCNext4_ID,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
+						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,PCNow_ID,PCNext4_ID,WriteRegAddress,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
 						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BranchEqual_EX,
 						RegDst_EX,ALUASrc_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
-						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,PCNow_EX,PCNext4_EX); 
+						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,PCNow_EX,PCNext4_EX,WriteRegAddress_EX); 
 						
 	EX_MEM_Reg EX_MEM_Reg(Clk,EX_MEM_Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDst_EX,RegWriteSel_EX,MemtoReg_EX,
-						ALUResult_EX,Zero_EX,PCNext4_EX,Instruction_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
+						ALUResult_EX,Zero_EX,PCNext4_EX,Instruction_EX,WriteRegAddress_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
 						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDst_MEM,RegWriteSel_MEM,
-						MemtoReg_MEM,ALUResult_MEM,Zero_MEM,PCNext4_MEM,Instruction_MEM);
+						MemtoReg_MEM,ALUResult_MEM,Zero_MEM,PCNext4_MEM,Instruction_MEM,WriteRegAddress_MEM);
 						
 	MEM_WB_REG mem_wb_reg(Clk, MEM_WB_Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
-						ReadData1_MEM,Zero_MEM,RegDst_MEM,PCNext4_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
-						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB,PCNext4_WB);					
+						ReadData1_MEM,Zero_MEM,RegDst_MEM,PCNext4_MEM,WriteRegAddress_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
+						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB,PCNext4_WB,WriteRegAddress_WB	);					
 
 	assign ReadRegister1 = Instruction_ID[25:21];// rs
 	assign ReadRegister2 = Instruction_ID[20:16];// rt
