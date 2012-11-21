@@ -20,23 +20,25 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module if_id_reg(clk,rst,pc_in,instruction_in,instruction_out,pc_out);
+module if_id_reg(clk,rst,instruction_in,PCNow_in,PCNext4_in,instruction_out,PCNow_out,PCNext4_out);
     input clk, rst;
-	 input [31:0] instruction_in,pc_in;
-	 output [31:0] instruction_out, pc_out;
-	 reg [31:0] instruction_out, pc_out;
+	 input [31:0] instruction_in,PCNext4_in,PCNow_in;
+	 output [31:0] instruction_out, PCNext4_out,PCNow_out;
+	 reg [31:0] instruction_out, PCNext4_out,PCNow_out;
 
 	 
 	always@(rst)
 	begin
 		instruction_out <= 32'b0;
-		pc_out <= 32'b0;
+		PCNext4_out <= 32'b0;
+		PCNow_out <= 0;
 	end
 
 	always@(posedge clk)
 	begin
 		instruction_out <= instruction_in;
-		pc_out <= pc_in;
+		PCNext4_out <= PCNext4_in;
+		PCNow_out <= PCNow_in;
 	end
 	 
 

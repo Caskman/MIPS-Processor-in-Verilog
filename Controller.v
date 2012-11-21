@@ -2,7 +2,10 @@ module Controller(Clk,Reset);
 	input Clk;
 	input Reset;
 	wire [31:0] Instruction_IF,Instruction_ID,Instruction_EX,Instruction_MEM,Instruction_WB;
-	wire [31:0] NextInstruct_IF,NextInstruct_ID,NextInstruct_EX,NextInstruct_MEM,NextInstruct_WB;
+	wire [31:0] PCNext4_IF,PCNext4_ID,PCNext4_EX,PCNext4_MEM,PCNext4_WB;
+	wire [31:0] PCNow_IF,PCNow_ID,PCNow_EX;
+	wire [31:0] PCTarget,JumpTarget,BranchTarget;
+	wire PCNextSel;
 	
 	wire [31:0] ReadData1,ReadData1_EX,ReadData1_MEM,ReadData1_WB;
 	wire [31:0] ReadData2,ReadData2_EX,ReadData2_MEM;
@@ -13,6 +16,8 @@ module Controller(Clk,Reset);
 	wire [1:0] RegDst_EX,RegDst_MEM,RegDst_WB;
 	reg RegWriteSel;
 	wire RegWriteSel_EX,RegWriteSel_MEM,RegWriteSel_WB;
+	wire [31:0] WriteDataToReg;
+	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	wire [31:0] Extended15to0Inst,Extended15to0Inst_EX;
 	
 	reg [3:0] ALUControl;
@@ -30,6 +35,7 @@ module Controller(Clk,Reset);
 	reg BranchFlush;
 	wire BranchFlush_EX;
 	
+	
 	reg [1:0] BHW;
 	wire [1:0] BHW_EX,BHW_MEM;
 	reg [1:0] MemtoReg;
@@ -40,46 +46,50 @@ module Controller(Clk,Reset);
 	wire MemRead_EX,MemRead_MEM;
 	reg DataMemExtendSign;
 	wire DataMemExtendSign_EX,DataMemExtendSign_MEM;
-	wire [31:0] WriteDataToReg,WriteDataToMem,MemToRegData;
+	wire [31:0] WriteDataToMem;
 	wire [31:0] ReadDataFromMem,ReadDataFromMem_WB;
 	
-	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
 	reg JumpFlush,Jump,NOOP,ExtendSign;
 	reg JumpSel;
 
 	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset;
 	
 	
-	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,NextInstruct_IF,ReadData1,JumpSel);
+	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF);
+	// InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,PCNext4_IF,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegister,WriteDataToReg,RegWriteOut,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
-	DataMemory DMem(ALUResult_MEM, WriteDataToMem, Clk, MemWrite, MemRead, ReadDataFromMem,BHW,DataMemExtendSign);
+	DataMemory DMem(ALUResult_MEM, ReadData2_MEM, Clk, MemWrite_MEM, MemRead_MEM, ReadDataFromMem,BHW_MEM,DataMemExtendSign_MEM);
 	sign_extension InstExtend(Extended15to0Inst,Instruction_ID[15:0],ExtendSign);
-	mux_4to1_32bit RegDataMux(WriteDataToReg, ALUResult_WB, ReadDataFromMem_WB,NextInstruct_WB,ReadData1_WB, MemtoReg_WB);
-	mux_4to1_5bit WriteRegInputMux(WriteRegister,ReadRegister2,Instruction_ID[15:11],5'd31,5'h0,RegDst);
+	mux_4to1_32bit RegDataMux(WriteDataToReg, ALUResult_WB, ReadDataFromMem_WB,PCNext4_WB,ReadData1_WB, MemtoReg_WB);
+	mux_4to1_5bit WriteRegInputMux(WriteRegister,Instruction_WB[20:16],Instruction_WB[15:11],5'd31,5'h0,RegDst_WB);
 	mux_4to1_32bit ALUAInputMux(ALUSrcInA,ReadData1_EX,ReadData2_EX,Extended15to0Inst_EX,32'b0,ALUASrc_EX);
 	mux_16to1_32bit ALUBInputMux(ALUSrcInB,ReadData2_EX,Extended15to0Inst_EX,32'd0,32'd1,{27'd0,Instruction_EX[10:6]},ReadData1_EX,32'd16,{26'd0,Instruction_EX[21],Instruction_EX[10:6]},{26'd0,Instruction_EX[6],ReadData1_EX[4:0]},32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,32'd0,ALUBSrc_EX);
-	//mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,NextInstruct_ID,ReadData1,32'd0,RegDataSel);
+	//mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,PCNext4_ID,ReadData1,32'd0,RegDataSel);
 	mux_2to1_1bit RegWriteMux(RegWriteOut,RegWrite_WB,Zero_WB,RegWriteSel_WB);
-						
-	if_id_reg  IF_ID_REG(Clk,ID_ID_Reset,NextInstruct_IF,Instruction_IF,Instruction_ID,NextInstruct_ID);
+	
+	mux_2to1_32bit JumpOrBranchMux(PCTarget,JumpTarget,BranchTarget,Branch);
+	mux_2to1_32bit jumpsel(JumpTarget, {PCNow_ID[31:26],(Instruction_ID[25:0]<<2)}, ReadData1, JumpSel);
+
+
+	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,Instruction_IF,PCNow_IF,PCNext4_IF,Instruction_ID,PCNow_ID,PCNext4_ID);
 	
 	ID_EX_REG  id_ex_reg(Clk, ID_EX_Reset,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
 						BranchNotEqual,BranchEqual,RegDst,ALUASrc,BHW,ALUBSrc,ALUControl,ReadData1, 
-						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,NextInstruct_ID,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
+						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,PCNow_ID,PCNext4_ID,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
 						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BranchEqual_EX,
 						RegDst_EX,ALUASrc_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
-						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,NextInstruct_EX); 
+						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,PCNow_EX,PCNext4_EX); 
 						
 	EX_MEM_Reg EX_MEM_Reg(Clk,EX_MEM_Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDst_EX,RegWriteSel_EX,MemtoReg_EX,
-						ALUResult_EX,Zero_EX,NextInstruct_EX,Instruction_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
+						ALUResult_EX,Zero_EX,PCNext4_EX,Instruction_EX,MemRead_MEM,MemWrite_MEM,BHW_MEM,DataMemExtendSign_MEM,
 						ReadData1_MEM,ReadData2_MEM,RegWrite_MEM,RegDst_MEM,RegWriteSel_MEM,
-						MemtoReg_MEM,ALUResult_MEM,Zero_MEM,NextInstruct_MEM,Instruction_MEM);
+						MemtoReg_MEM,ALUResult_MEM,Zero_MEM,PCNext4_MEM,Instruction_MEM);
 						
 	MEM_WB_REG mem_wb_reg(Clk, MEM_WB_Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem, MemtoReg_MEM, RegWrite_MEM,RegWriteSel_MEM,
-						ReadData1_MEM,Zero_MEM,RegDst_MEM,NextInstruct_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
-						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB,NextInstruct_WB);					
+						ReadData1_MEM,Zero_MEM,RegDst_MEM,PCNext4_MEM,ALUResult_WB,Instruction_WB,ReadDataFromMem_WB, MemtoReg_WB, 
+						RegWrite_WB,RegWriteSel_WB,ReadData1_WB,RegDst_WB,Zero_WB,PCNext4_WB);					
 
 	assign ReadRegister1 = Instruction_ID[25:21];// rs
 	assign ReadRegister2 = Instruction_ID[20:16];// rt
@@ -89,10 +99,12 @@ module Controller(Clk,Reset);
 	assign BranchOut3 = BranchBLTZ_BGTZ_EX & ALUResult_EX[0];
 	assign BranchOut4 = BranchBGEZ_EX & ~(ALUResult_EX[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
-	assign IF_ID_Reset = JumpFlush | (BranchFlush & BranchOutTotal) | Reset;
-	assign ID_EX_Reset = (BranchFlush & BranchOutTotal) | Reset;
-	assign EX_MEM_Reset = (BranchFlush & BranchOutTotal) | Reset;
+	assign IF_ID_Reset = JumpFlush | (BranchFlush_EX & BranchOutTotal) | Reset;
+	assign ID_EX_Reset = Reset;
+	assign EX_MEM_Reset = Reset;
 	assign MEM_WB_Reset = Reset;
+	assign PCNextSel = BranchOutTotal | Jump;
+	assign BranchTarget = PCNow_EX + (Extended15to0Inst_EX<<2);
 	 
 
 	always @(Reset) begin

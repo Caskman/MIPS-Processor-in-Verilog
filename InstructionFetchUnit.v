@@ -33,34 +33,25 @@
 // which generates a continuous clock pulse into the module.
 ////////////////////////////////////////////////////////////////////////////////
 
-module InstructionFetchUnit(Instruction, Reset, Clk,InstructOffset,Branch,JumpInstruction,Jump,NextInstruct,JumpRegister,JumpSel);
+module InstructionFetchUnit(Instruction, Reset, Clk,NewPC,Jump,PCNow,PCNext4);
 
-    /* Please fill in the implementation here... */
-	 wire [31:0] PCAdderOut,PCNext,Instruction,ALUResult,PCOut,PCNextBeforeBranch;
-	 wire Zero;
-	 input Reset,Clk,Branch,Jump,JumpSel;
-	 input [31:0] InstructOffset,JumpRegister;
-	 input [25:0] JumpInstruction;
-	 wire [31:0] JumpIn;
-	 reg [3:0] ALUControl;
-	 
-	 output [31:0] Instruction,NextInstruct;
-	 
-	 initial begin
-		ALUControl <= 2;
-	 end
-	 
-	 PCAdder adder(PCOut,PCAdderOut);
-	 
-	 ProgramCounter PC(PCNext,PCOut,Reset,Clk);
-	 
-	 InstructionMemory mem(PCOut,Instruction);
-	 mux_2to1_32bit JumpOrBranchMux(PCNext,PCNextBeforeBranch,ALUResult,Branch);
-	 mux_2to1_32bit jumpsel(JumpIn, {PCOut[31:26],(JumpInstruction<<2)}, JumpRegister, JumpSel); 
-	 mux_2to1_32bit JumpOrPCNext4Mux(PCNextBeforeBranch,PCAdderOut,JumpIn,Jump); 
-	 ALU32Bit OffsetCalc(ALUControl,PCOut,(InstructOffset<<2),ALUResult,Zero);
-	 
-	 assign NextInstruct = PCAdderOut;
+	/* Please fill in the implementation here... */
+	wire [31:0] PCAdderOut,PCNext,Instruction,PCOut;
+	input Reset,Clk,Jump;
+	input [31:0] NewPC;
+	output [31:0] Instruction,PCNext4,PCNow;
+
+
+	PCAdder adder(PCOut,PCAdderOut);
+	ProgramCounter PC(PCNext,PCOut,Reset,Clk);
+	InstructionMemory mem(PCOut,Instruction);
+	mux_2to1_32bit JumpOrPCNext4Mux(PCNext,PCAdderOut,NewPC,Jump); 
+	// mux_2to1_32bit JumpOrBranchMux(PCNext,PCNextBeforeBranch,ALUResult,Branch);
+	// mux_2to1_32bit jumpsel(JumpIn, {PCOut[31:26],(JumpInstruction<<2)}, JumpRegister, JumpSel); 
+	// ALU32Bit OffsetCalc(4'd2,PCOut,(InstructOffset<<2),ALUResult,Zero);
+
+	assign PCNow = PCOut;
+	assign PCNext4 = PCAdderOut;
 
 endmodule
 

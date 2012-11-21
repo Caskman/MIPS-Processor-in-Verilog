@@ -1,56 +1,53 @@
-# This program adds up a garbled mess based on the data but outputs 0x9ff6 based on this data set
-
 .data
-	size:	.word	10
-	data:	.word	0,1,2,3,4,5,6,7,8,9
+	stuff:	.word	1,2,3,4,5
+	size:	.word	5
 .text
 main:
 	nop
-	addi $sp,$sp,-4	# extend stack pointer
-	sw $ra,0($sp)	# save return address
+	li $a0,0
+	li $a1,4
+	#la $a0,size
+	#la $a1,stuff
 	
-	li $s0,0
-	li $s1,1
-	la $s0,size
-	la $s1,data
-	
-	li $s2,0		# initialize counter
-	lw $s0,0($s0)	# load size
-	move $s3,$s1	# move pointer to another register
-	li $s4,0		# initialize sum to zero
+	li $t0,0 # counter
+	li $s0,0 # sum
+	lw $s1,0($a0) # size
+	nop
+	nop
 	
 loop:
-	lw $s5,0($s3)		# load value
-	li $s6,1			# load 1
-	sllv $s5,$s6,$s5	# shift value
-	sw $s5,0($s3)		# store modified value
-	move $a0,$s3		# set pointer argument
-	jal modify			# call function
-	add $s4,$s4,$v0		# add result to sum
-	addiu $s3,$s3,4		# increment pointer
-	addi $s2,$s2,1		# increment counter
-	bne $s2,$s0,loop	# loop condition
+	sll $t1,$t0,2
+	nop
+	nop
+	nop
+	nop
+	add $t1,$a1,$t1
+	nop
+	nop
+	nop
+	nop
+	lw $t1,0($t1)
+	nop
+	nop
+	nop
+	nop
+	add $s0,$s0,$t1
+	addi $t0,$t0,1
+	nop
+	nop
+	nop
+	nop
+	slt $t1,$t0,$s1
+	nop
+	nop
+	nop
+	nop
+	bne $t1,$zero,loop
+	nop
+	nop
+	nop
+	nop
 	
-done:	
-	move $v1,$s4
-	lw $ra,0($sp)	# restore return address
-	addi $sp,$sp,4	# restore stack pointer
-	j $ra
-	
-	
-	
-modify:
-	lbu $t1,0($a0)
-	li $t2,5
-	mul $t1,$t1,$t2
-	ori $t1,$t1,0xffff
-	move $v0,$t1
+	move $v1,$s0
+
 	jr $ra
-	
-	
-	
-	
-	
-	
-	
-	
