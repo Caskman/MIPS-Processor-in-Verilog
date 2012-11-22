@@ -50,8 +50,8 @@ module Controller(Clk,Reset);
 	reg DataMemExtendSign;
 	wire DataMemExtendSign_EX,DataMemExtendSign_MEM;
 	wire [31:0] WriteDataToMem;
-	wire [31:0] ReadDataFromMem,ReadDataFromMem_WB;
 	wire [31:0] RegData_MEM;
+	wire [31:0] ReadDataFromMem,ReadDataFromMem_WB;
 	
 	reg JumpFlush,Jump,NOOP,ExtendSign;
 	reg JumpSel;
