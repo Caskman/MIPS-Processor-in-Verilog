@@ -4,7 +4,7 @@ module Controller(Clk,Reset);
 	wire [31:0] Instruction_IF,PreInstruction_ID,Instruction_ID,Instruction_EX,Instruction_MEM,Instruction_WB;
 	wire [31:0] PCNext4_IF,PCNext4_ID,PCNext4_EX,PCNext4_MEM,PCNext4_WB;
 	wire [31:0] PCNow_IF,PCNow_ID,PCNow_EX;
-	wire [31:0] PCTarget,JumpTarget,BranchTarget;
+	wire [31:0] PCTarget,JumpTarget;
 	wire PCNextSel;
 	
 	wire [31:0] ReadData1,ReadData1_EX,ReadData1_MEM,ReadData1_WB;
@@ -19,7 +19,7 @@ module Controller(Clk,Reset);
 	reg RegWriteSel;
 	wire RegWriteSel_EX,RegWriteSel_MEM,RegWriteSel_WB;
 	wire [31:0] WriteDataToReg;
-	wire [4:0] ReadRegister1, ReadRegister2,WriteRegister;
+	wire [4:0] ReadRegister1, ReadRegister2;
 	wire [31:0] Extended15to0Inst,Extended15to0Inst_EX;
 	wire [4:0] WriteRegAddress,WriteRegAddress_EX,WriteRegAddress_MEM,WriteRegAddress_WB;
 	
@@ -96,7 +96,7 @@ module Controller(Clk,Reset);
 	HazardDetector hazardDetector(MemRead_EX,PreInstruction_ID[25:21],PreInstruction_ID[20:16],Instruction_EX[20:16],InstructionSel,PCWrite,IF_ID_Write,Reset);
 	mux_2to1_32bit InstructionMux(Instruction_ID,32'b0,PreInstruction_ID,InstructionSel);
 	
-	BranchPredictor BranchPredictor(BranchInstExists_ID,BranchInstExists_EX,BranchOutTotal,Prediction);
+	BranchPredictor BranchPredictor(Reset,BranchInstExists_ID,BranchInstExists_EX,BranchOutTotal,Prediction);
 	
 	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,IF_ID_Write,Instruction_IF,PCNow_IF,PCNext4_IF,PreInstruction_ID,PCNow_ID,PCNext4_ID);
 	

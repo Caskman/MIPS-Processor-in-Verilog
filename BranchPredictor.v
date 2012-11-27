@@ -1,12 +1,22 @@
-module BranchPredictor(BranchInstructExists_ID,BranchInstructExists_EX,BranchDecision_EX,Prediction);
+module BranchPredictor(Reset,BranchInstructExists_ID,BranchInstructExists_EX,BranchDecision_EX,Prediction);
 	parameter n = 4;
 	
-	input BranchInstructExists_ID,BranchInstructExists_EX,BranchDecision_EX;
+	integer i;
+	input BranchInstructExists_ID,BranchInstructExists_EX,BranchDecision_EX,Reset;
 	output Prediction;
 	reg Prediction;
 	
 	reg [n-1:0] BranchHistory;// PARAM [n-1:0]
 	reg [1:0] BranchPattern [0:(n*2)-1];// PARAM [0:(n*2)-1]
+	
+	always @(Reset) begin
+		if (Reset) begin
+			for (i = 0; i < (n*2); i = i + 1) begin
+				BranchPattern[i] <= 0;
+			end
+			BranchHistory <= 0;
+		end
+	end
 	
 	
 	always @ (BranchInstructExists_EX) begin
