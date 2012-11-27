@@ -1,6 +1,6 @@
 .data
-	stuff:	.word	1,2,3,4,5
-	size:	.word	5
+	stuff:	.word	1,2,3,4,5,6,7,8,9,10
+	size:	.word	10
 .text
 main:
 	nop
