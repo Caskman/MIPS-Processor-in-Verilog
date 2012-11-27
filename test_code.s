@@ -17,7 +17,6 @@ loop:
 	sll $t1,$t0,2
 	add $t1,$a1,$t1
 	lw $t1,0($t1)
-	nop
 	add $s0,$s0,$t1
 	addi $t0,$t0,1
 	slt $t1,$t0,$s1
