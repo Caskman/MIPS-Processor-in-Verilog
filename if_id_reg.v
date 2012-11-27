@@ -20,14 +20,14 @@
 // Additional Comments: 
 //
 //////////////////////////////////////////////////////////////////////////////////
-module if_id_reg(clk,rst,instruction_in,PCNow_in,PCNext4_in,instruction_out,PCNow_out,PCNext4_out);
-    input clk, rst;
+module if_id_reg(clk,rst,Write,instruction_in,PCNow_in,PCNext4_in,instruction_out,PCNow_out,PCNext4_out);
+    input clk, rst,Write;
 	 input [31:0] instruction_in,PCNext4_in,PCNow_in;
 	 output [31:0] instruction_out, PCNext4_out,PCNow_out;
 	 reg [31:0] instruction_out, PCNext4_out,PCNow_out;
 	 reg [31:0] instruction_outB, PCNext4_outB,PCNow_outB;
-
-	 
+	
+	
 	always@(rst)
 	begin
 		if (rst == 1) begin
@@ -43,9 +43,11 @@ module if_id_reg(clk,rst,instruction_in,PCNow_in,PCNext4_in,instruction_out,PCNo
 
 	always@(posedge clk)
 	begin
-		instruction_out <= instruction_in;
-		PCNext4_out <= PCNext4_in;
-		PCNow_out <= PCNow_in;
+		if (Write) begin
+			instruction_out <= instruction_in;
+			PCNext4_out <= PCNext4_in;
+			PCNow_out <= PCNow_in;
+		end
 	end
 	 
 	always@(negedge clk) begin

@@ -24,10 +24,10 @@
 // location, 0x00000000H).
 ////////////////////////////////////////////////////////////////////////////////
 
-module ProgramCounter(PCNext, PCResult, Reset, Clk);
+module ProgramCounter(PCNext, PCResult, Reset, Clk,PCWrite);
 
 	input       [31:0]  PCNext;
-	input               Reset, Clk;
+	input               Reset, Clk,PCWrite;
 
 	output reg  [31:0]  PCResult;
 
@@ -46,7 +46,9 @@ module ProgramCounter(PCNext, PCResult, Reset, Clk);
     	end
     	else
     	begin
-    		PCResult <= PCNext;
+			if (PCWrite == 1) begin
+				PCResult <= PCNext;
+			end
     	end
 
 		$display("PC=%h",PCResult);

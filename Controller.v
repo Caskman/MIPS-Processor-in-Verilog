@@ -1,7 +1,7 @@
 module Controller(Clk,Reset);
 	input Clk;
 	input Reset;
-	wire [31:0] Instruction_IF,Instruction_ID,Instruction_EX,Instruction_MEM,Instruction_WB;
+	wire [31:0] Instruction_IF,PreInstruction_ID,Instruction_ID,Instruction_EX,Instruction_MEM,Instruction_WB;
 	wire [31:0] PCNext4_IF,PCNext4_ID,PCNext4_EX,PCNext4_MEM,PCNext4_WB;
 	wire [31:0] PCNow_IF,PCNow_ID,PCNow_EX;
 	wire [31:0] PCTarget,JumpTarget,BranchTarget;
@@ -57,9 +57,10 @@ module Controller(Clk,Reset);
 	reg JumpSel;
 
 	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset;
+	wire InstructionSel,PCWrite,IF_ID_Write;
 	
 	
-	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF);
+	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF,PCWrite);
 	// InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,PCNext4_IF,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegAddress_WB,WriteDataToReg,RegWriteFinal_WB,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
@@ -83,8 +84,11 @@ module Controller(Clk,Reset);
 	mux_4to1_32bit ReadData2SelMux(ReadData2Final,ReadData2_EX,RegData_MEM,WriteDataToReg,32'b0,ReadData2Sel);
 	mux_4to1_32bit RegDataMux_MEM(RegData_MEM,ALUResult_MEM,ReadDataFromMem,PCNext4_MEM,ReadData1_MEM,MemtoReg_MEM);
 	mux_2to1_1bit RegWriteMux_MEM(RegWriteFinal_MEM,RegWrite_MEM,Zero_MEM,RegWriteSel_MEM);
-
-	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,Instruction_IF,PCNow_IF,PCNext4_IF,Instruction_ID,PCNow_ID,PCNext4_ID);
+	
+	HazardDetector hazardDetector(MemRead_EX,PreInstruction_ID[25:21],PreInstruction_ID[20:16],Instruction_EX[20:16],InstructionSel,PCWrite,IF_ID_Write,Reset);
+	mux_2to1_32bit InstructionMux(Instruction_ID,32'b0,PreInstruction_ID,InstructionSel);
+	
+	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,IF_ID_Write,Instruction_IF,PCNow_IF,PCNext4_IF,PreInstruction_ID,PCNow_ID,PCNext4_ID);
 	
 	ID_EX_REG  id_ex_reg(Clk, ID_EX_Reset,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
 						BranchNotEqual,BranchEqual,RegDst,ALUASrc,BHW,ALUBSrc,ALUControl,ReadData1, 

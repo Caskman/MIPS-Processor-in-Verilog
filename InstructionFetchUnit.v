@@ -33,17 +33,17 @@
 // which generates a continuous clock pulse into the module.
 ////////////////////////////////////////////////////////////////////////////////
 
-module InstructionFetchUnit(Instruction, Reset, Clk,NewPC,Jump,PCNow,PCNext4);
+module InstructionFetchUnit(Instruction, Reset, Clk,NewPC,Jump,PCNow,PCNext4,PCWrite);
 
 	/* Please fill in the implementation here... */
 	wire [31:0] PCAdderOut,PCNext,Instruction,PCOut;
-	input Reset,Clk,Jump;
+	input Reset,Clk,Jump,PCWrite;
 	input [31:0] NewPC;
 	output [31:0] Instruction,PCNext4,PCNow;
 
 
 	PCAdder adder(PCOut,PCAdderOut);
-	ProgramCounter PC(PCNext,PCOut,Reset,Clk);
+	ProgramCounter PC(PCNext,PCOut,Reset,Clk,PCWrite);
 	InstructionMemory mem(PCOut,Instruction);
 	mux_2to1_32bit JumpOrPCNext4Mux(PCNext,PCAdderOut,NewPC,Jump); 
 	// mux_2to1_32bit JumpOrBranchMux(PCNext,PCNextBeforeBranch,ALUResult,Branch);
