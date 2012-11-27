@@ -37,6 +37,10 @@ module Controller(Clk,Reset);
 	wire BranchOut1,BranchOut2,BranchOut3,BranchOut4,BranchOutTotal;
 	reg BranchFlush;
 	wire BranchFlush_EX;
+	wire [31:0] BranchTarget_ID,BranchTarget_EX,BranchTargetFinal;
+	wire [31:0] BranchTargetCorrection;
+	wire PredictionError,BranchFinal,ErrorType,Prediction;
+	wire BranchInstExists_ID,BranchInstExists_EX;
 	
 	
 	reg [1:0] BHW;
@@ -75,10 +79,12 @@ module Controller(Clk,Reset);
 	//mux_4to1_32bit RegDataMux(WriteDataToReg,MemToRegData,PCNext4_ID,ReadData1,32'd0,RegDataSel);
 	mux_2to1_1bit RegWriteMux(RegWriteFinal_WB,RegWrite_WB,Zero_WB,RegWriteSel_WB);
 	
-	mux_2to1_32bit JumpOrBranchMux(PCTarget,JumpTarget,BranchTarget,Branch);
+	mux_2to1_32bit PCTargetMux(PCTarget,JumpTarget,BranchTargetFinal,BranchFinal);
 	mux_2to1_32bit jumpsel(JumpTarget, {PCNow_ID[31:26],(Instruction_ID[25:0]<<2)}, ReadData1, JumpSel);
 	
-	mux_2to1_32bit BranchTargetMux(BranchTarget,);
+	mux_2to1_32bit BranchTargetMux(BranchTargetFinal,BranchTarget_ID,BranchTargetCorrection,PredictionError);
+	mux_2to1_32bit BranchTargetCorrectionMux(BranchTargetCorrection,BranchTarget_EX,PCNext4_EX,ErrorType);
+	
 	
 	ForwardingControl forward(Instruction_EX[25:21],Instruction_EX[20:16],RegWriteFinal_MEM,WriteRegAddress_MEM,
 								RegWriteFinal_WB,WriteRegAddress_WB,ReadData1Sel,ReadData2Sel);
@@ -90,16 +96,16 @@ module Controller(Clk,Reset);
 	HazardDetector hazardDetector(MemRead_EX,PreInstruction_ID[25:21],PreInstruction_ID[20:16],Instruction_EX[20:16],InstructionSel,PCWrite,IF_ID_Write,Reset);
 	mux_2to1_32bit InstructionMux(Instruction_ID,32'b0,PreInstruction_ID,InstructionSel);
 	
-	// BranchPredictor BranchPredictor();
+	BranchPredictor BranchPredictor(BranchInstExists_ID,BranchInstExists_EX,BranchOutTotal,Prediction);
 	
 	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,IF_ID_Write,Instruction_IF,PCNow_IF,PCNext4_IF,PreInstruction_ID,PCNow_ID,PCNext4_ID);
 	
 	ID_EX_REG  id_ex_reg(Clk, ID_EX_Reset,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMemExtendSign,BranchBLTZ_BGTZ,BranchBGEZ,
 						BranchNotEqual,BranchEqual,RegDst,ALUASrc,BHW,ALUBSrc,ALUControl,ReadData1, 
-						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,PCNow_ID,PCNext4_ID,WriteRegAddress,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
+						ReadData2,Instruction_ID,Extended15to0Inst,BranchFlush,PCNow_ID,PCNext4_ID,WriteRegAddress,Prediction,MemWrite_EX, MemRead_EX,RegWrite_EX,RegWriteSel_EX,
 						MemtoReg_EX,DataMemExtendSign_EX,BranchBLTZ_BGTZ_EX,BranchBGEZ_EX,BranchNotEqual_EX,BranchEqual_EX,
 						RegDst_EX,ALUASrc_EX,BHW_EX,ALUBSrc_EX,ALUControl_EX,ReadData1_EX, ReadData2_EX,
-						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,PCNow_EX,PCNext4_EX,WriteRegAddress_EX); 
+						Instruction_EX,Extended15to0Inst_EX,BranchFlush_EX,PCNow_EX,PCNext4_EX,WriteRegAddress_EX,Prediction_EX); 
 						
 	EX_MEM_Reg EX_MEM_Reg(Clk,EX_MEM_Reset,MemRead_EX,MemWrite_EX,BHW_EX,DataMemExtendSign_EX,ReadData1_EX,
 						ReadData2_EX,RegWrite_EX,RegDst_EX,RegWriteSel_EX,MemtoReg_EX,
@@ -119,12 +125,19 @@ module Controller(Clk,Reset);
 	assign BranchOut3 = BranchBLTZ_BGTZ_EX & ALUResult_EX[0];
 	assign BranchOut4 = BranchBGEZ_EX & ~(ALUResult_EX[0]);
 	assign BranchOutTotal = BranchOut1 | BranchOut2 | BranchOut3 | BranchOut4;
-	assign IF_ID_Reset = JumpFlush | (BranchFlush_EX & BranchOutTotal) | Reset;
+	assign IF_ID_Reset = JumpFlush | PredictionError | Reset;
 	assign ID_EX_Reset = Reset;
 	assign EX_MEM_Reset = Reset;
 	assign MEM_WB_Reset = Reset;
-	assign PCNextSel = BranchOutTotal | Jump;
-	// assign BranchTarget = PCNow_EX + (Extended15to0Inst_EX<<2);
+	assign PCNextSel = Prediction | PredictionError | Jump;
+	assign BranchTarget_ID = PCNow_ID + (Extended15to0Inst<<2);
+	assign BranchTarget_EX = PCNow_EX + (Extended15to0Inst_EX<<2);
+	assign PredictionError = Prediction_EX ^ BranchOutTotal;
+	assign BranchFinal = Prediction | PredictionError;
+	assign ErrorType = Prediction_EX;
+	assign BranchInstExists_ID = BranchEqual | BranchNotEqual | BranchBLTZ_BGTZ | BranchBGEZ;
+	assign BranchInstExists_EX = BranchEqual_EX | BranchNotEqual_EX | BranchBLTZ_BGTZ_EX | BranchBGEZ_EX;
+	
 	 
 
 	always @(Reset) begin
