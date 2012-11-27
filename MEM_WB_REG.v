@@ -44,17 +44,19 @@ module MEM_WB_REG(Clk, Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, 
 	 
 always@(Reset)
 begin
-	ALUResult_WB			<=  0;
-	Instruction_WB			<=  0;
-	ReadDataFromMem_WB   <=  0;
-	MemtoReg_WB				<=  0;
-	RegWrite_WB				<=  0;
-	RegWriteSel_WB			<=  0;
-   RegDst_WB				<=  0;
-	Zero_WB					<=  0;
-	ReadData1_WB			<=  0;
-	NextInstruct_out <= 0;
-	WriteRegAddress_out <= 0;
+	if (Reset == 1) begin
+		ALUResult_WB			<=  0;
+		Instruction_WB			<=  0;
+		ReadDataFromMem_WB   <=  0;
+		MemtoReg_WB				<=  0;
+		RegWrite_WB				<=  0;
+		RegWriteSel_WB			<=  0;
+		RegDst_WB				<=  0;
+		Zero_WB					<=  0;
+		ReadData1_WB			<=  0;
+		NextInstruct_out <= 0;
+		WriteRegAddress_out <= 0;
+	end
 end
 
 always@(posedge Clk)

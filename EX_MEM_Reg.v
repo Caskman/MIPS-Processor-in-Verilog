@@ -41,21 +41,23 @@ module EX_MEM_Reg(clk,rst,MemRead_in,MemWrite_in,BHW_in,DataMemExtendSign_in,Rea
 
 always@(rst)
 begin
-	MemRead_out <= 0;
-	MemWrite_out <= 0;
-	BHW_out <= 0;
-	DataMemExtendSign_out <= 0;
-	ReadData1_out <= 0;
-	ReadData2_out <= 0;
-	RegWrite_out <= 0;
-	RegDst_out <= 0;
-	RegWriteSel_out <= 0;
-	MemToReg_out <= 0;
-	ALUResult_out <= 0;
-	Zero_out <= 0;
-	NextInstruct_out <= 0;
-	Instruction_out <= 0;
-	WriteRegAddress_out <= 0;
+	if (rst == 1) begin
+		MemRead_out <= 0;
+		MemWrite_out <= 0;
+		BHW_out <= 0;
+		DataMemExtendSign_out <= 0;
+		ReadData1_out <= 0;
+		ReadData2_out <= 0;
+		RegWrite_out <= 0;
+		RegDst_out <= 0;
+		RegWriteSel_out <= 0;
+		MemToReg_out <= 0;
+		ALUResult_out <= 0;
+		Zero_out <= 0;
+		NextInstruct_out <= 0;
+		Instruction_out <= 0;
+		WriteRegAddress_out <= 0;
+	end
 end
 
 always@(posedge clk)

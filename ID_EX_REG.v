@@ -53,29 +53,31 @@ module ID_EX_REG(clk, rst,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMe
 	
 always@(rst)
 begin
-   MemWrite_EX 			<=  0;
-	MemRead_EX 				<=  0;
-	RegWrite_EX 			<=  0;
-	RegWriteSel_EX 		<=  0;
-	MemtoReg_EX 			<=  0;
-	DataMemExtendSign_EX <=  0;
-	BranchBLTZ_BGTZ_EX 	<=  0;
-	BranchBGEZ_EX 			<=	 0;
-	BranchNotEqual_EX 	<=  0;
-	BranchEqual_EX		<=  0;
-	RegDest_EX				<=  0;
-	ALUASrc_EX				<=  0;
-	BHW_EX					<=  0;
-	ALUBSrc_EX				<=  0;
-	ALUControl_EX			<=  0;
-	ReadData1_EX		<=  0;
-	ReadData2_EX		<=  0;
-	Instruction_EX			<=  0;
-	Extended15to0Inst_EX <=  0;
-	PCNext4_out <= 0;
-	BranchFlush_EX <= 0;
-	PCNow_out <= 0;
-	WriteRegAddress_out <= 0;
+	if (rst == 1) begin
+		MemWrite_EX 			<=  0;
+		MemRead_EX 				<=  0;
+		RegWrite_EX 			<=  0;
+		RegWriteSel_EX 		<=  0;
+		MemtoReg_EX 			<=  0;
+		DataMemExtendSign_EX <=  0;
+		BranchBLTZ_BGTZ_EX 	<=  0;
+		BranchBGEZ_EX 			<=	 0;
+		BranchNotEqual_EX 	<=  0;
+		BranchEqual_EX		<=  0;
+		RegDest_EX				<=  0;
+		ALUASrc_EX				<=  0;
+		BHW_EX					<=  0;
+		ALUBSrc_EX				<=  0;
+		ALUControl_EX			<=  0;
+		ReadData1_EX		<=  0;
+		ReadData2_EX		<=  0;
+		Instruction_EX			<=  0;
+		Extended15to0Inst_EX <=  0;
+		PCNext4_out <= 0;
+		BranchFlush_EX <= 0;
+		PCNow_out <= 0;
+		WriteRegAddress_out <= 0;
+	end
 end
 
 always@(posedge clk)
