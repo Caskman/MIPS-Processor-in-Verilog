@@ -78,6 +78,8 @@ module Controller(Clk,Reset);
 	mux_2to1_32bit JumpOrBranchMux(PCTarget,JumpTarget,BranchTarget,Branch);
 	mux_2to1_32bit jumpsel(JumpTarget, {PCNow_ID[31:26],(Instruction_ID[25:0]<<2)}, ReadData1, JumpSel);
 	
+	mux_2to1_32bit BranchTargetMux(BranchTarget,);
+	
 	ForwardingControl forward(Instruction_EX[25:21],Instruction_EX[20:16],RegWriteFinal_MEM,WriteRegAddress_MEM,
 								RegWriteFinal_WB,WriteRegAddress_WB,ReadData1Sel,ReadData2Sel);
 	mux_4to1_32bit ReadData1SelMux(ReadData1Final,ReadData1_EX,RegData_MEM,WriteDataToReg,32'b0,ReadData1Sel);
@@ -87,6 +89,8 @@ module Controller(Clk,Reset);
 	
 	HazardDetector hazardDetector(MemRead_EX,PreInstruction_ID[25:21],PreInstruction_ID[20:16],Instruction_EX[20:16],InstructionSel,PCWrite,IF_ID_Write,Reset);
 	mux_2to1_32bit InstructionMux(Instruction_ID,32'b0,PreInstruction_ID,InstructionSel);
+	
+	// BranchPredictor BranchPredictor();
 	
 	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,IF_ID_Write,Instruction_IF,PCNow_IF,PCNext4_IF,PreInstruction_ID,PCNow_ID,PCNext4_ID);
 	
@@ -120,7 +124,7 @@ module Controller(Clk,Reset);
 	assign EX_MEM_Reset = Reset;
 	assign MEM_WB_Reset = Reset;
 	assign PCNextSel = BranchOutTotal | Jump;
-	assign BranchTarget = PCNow_EX + (Extended15to0Inst_EX<<2);
+	// assign BranchTarget = PCNow_EX + (Extended15to0Inst_EX<<2);
 	 
 
 	always @(Reset) begin
