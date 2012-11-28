@@ -1,7 +1,7 @@
 module Controller(Clk,Reset);
 	input Clk;
 	input Reset;
-	wire [31:0] Instruction_IF,PreInstruction_ID,Instruction_ID,Instruction_EX,Instruction_MEM,Instruction_WB;
+	wire [31:0] PreInstruction_IF,Instruction_IF,PreInstruction_ID,Instruction_ID,Instruction_EX,Instruction_MEM,Instruction_WB;
 	wire [31:0] PCNext4_IF,PCNext4_ID,PCNext4_EX,PCNext4_MEM,PCNext4_WB;
 	wire [31:0] PCNow_IF,PCNow_ID,PCNow_EX;
 	wire [31:0] PCTarget,JumpTarget;
@@ -61,10 +61,10 @@ module Controller(Clk,Reset);
 	reg JumpSel;
 
 	wire IF_ID_Reset,ID_EX_Reset,EX_MEM_Reset,MEM_WB_Reset;
-	wire InstructionSel,PCWrite,IF_ID_Write;
+	wire InstructionSel_IF,InstructionSel_ID,PCWrite,IF_ID_Write,Stall;
 	
 	
-	InstructionFetchUnit IF(Instruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF,PCWrite);
+	InstructionFetchUnit IF(PreInstruction_IF,Reset,Clk,PCTarget,PCNextSel,PCNow_IF,PCNext4_IF,PCWrite);
 	// InstructionFetchUnit IF(Instruction_IF,Reset,Clk,Extended15to0Inst_EX,BranchOutTotal,Instruction_ID[25:0],Jump,PCNext4_IF,ReadData1,JumpSel);
 	RegisterFile RF(ReadRegister1,ReadRegister2,WriteRegAddress_WB,WriteDataToReg,RegWriteFinal_WB,Clk,ReadData1,ReadData2);
 	ALU32Bit ALU(ALUControl_EX, ALUSrcInA, ALUSrcInB, ALUResult_EX, Zero_EX);
@@ -93,10 +93,12 @@ module Controller(Clk,Reset);
 	mux_4to1_32bit RegDataMux_MEM(RegData_MEM,ALUResult_MEM,ReadDataFromMem,PCNext4_MEM,ReadData1_MEM,MemtoReg_MEM);
 	mux_2to1_1bit RegWriteMux_MEM(RegWriteFinal_MEM,RegWrite_MEM,Zero_MEM,RegWriteSel_MEM);
 	
-	HazardDetector hazardDetector(MemRead_EX,PreInstruction_ID[25:21],PreInstruction_ID[20:16],Instruction_EX[20:16],InstructionSel,PCWrite,IF_ID_Write,Reset);
-	mux_2to1_32bit InstructionMux(Instruction_ID,32'b0,PreInstruction_ID,InstructionSel);
+	HazardDetector hazardDetector(MemRead_EX,PreInstruction_ID[25:21],PreInstruction_ID[20:16],Instruction_EX[20:16],Stall,Reset);
+	mux_2to1_32bit InstructionMux_IF(Instruction_IF,PreInstruction_IF,32'b0,InstructionSel_IF);
+	mux_2to1_32bit InstructionMux_ID(Instruction_ID,PreInstruction_ID,32'b0,InstructionSel_ID);
 	
 	BranchPredictor BranchPredictor(Reset,BranchInstExists_ID,BranchInstExists_EX,BranchOutTotal,Prediction);
+	
 	
 	if_id_reg  IF_ID_REG(Clk,IF_ID_Reset,IF_ID_Write,Instruction_IF,PCNow_IF,PCNext4_IF,PreInstruction_ID,PCNow_ID,PCNext4_ID);
 	
@@ -137,7 +139,9 @@ module Controller(Clk,Reset);
 	assign ErrorType = Prediction_EX;
 	assign BranchInstExists_ID = BranchEqual | BranchNotEqual | BranchBLTZ_BGTZ | BranchBGEZ;
 	assign BranchInstExists_EX = BranchEqual_EX | BranchNotEqual_EX | BranchBLTZ_BGTZ_EX | BranchBGEZ_EX;
-	
+	assign InstructionSel_IF = Prediction;
+	assign InstructionSel_ID = Stall;
+	assign PCWrite = ~Stall;	
 	 
 
 	always @(Reset) begin
