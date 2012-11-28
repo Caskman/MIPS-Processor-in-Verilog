@@ -141,7 +141,8 @@ module Controller(Clk,Reset);
 	assign BranchInstExists_EX = BranchEqual_EX | BranchNotEqual_EX | BranchBLTZ_BGTZ_EX | BranchBGEZ_EX;
 	assign InstructionSel_IF = Prediction;
 	assign InstructionSel_ID = Stall;
-	assign PCWrite = ~Stall;	
+	assign PCWrite = ~Stall;
+	assign IF_ID_Write = ~Stall;
 	 
 
 	always @(Reset) begin
