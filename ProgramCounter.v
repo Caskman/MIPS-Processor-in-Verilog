@@ -51,7 +51,7 @@ module ProgramCounter(PCNext, PCResult, Reset, Clk,PCWrite);
 			end
     	end
 
-		$display("PC=%h",PCResult);
+		//$display("PC=%h",PCResult);
     end
 
 endmodule

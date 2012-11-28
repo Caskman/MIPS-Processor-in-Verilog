@@ -21,12 +21,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module InstructionMemory(Address, Instruction); 
-
+	parameter size = 1024;
+	
+	integer i;
+	
     input       [31:0]  Address;        // Input Address 
 
     output   [31:0]  Instruction;    // Instruction at memory location Address
     
-    reg [31:0] mem[0:1024];
+    reg [31:0] mem[0:size];
 
 
     /* Please fill in the implementation here */
@@ -34,6 +37,9 @@ module InstructionMemory(Address, Instruction);
 
 	initial
 	begin
+		for (i = 0; i < size; i = i + 1) begin
+			mem[i] = 0;
+		end
 		$readmemh("code.txt",mem);
 	end
 

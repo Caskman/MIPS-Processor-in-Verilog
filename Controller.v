@@ -439,6 +439,22 @@ module Controller(Clk,Reset);
 							BranchBGEZ <= 0;
 							//RegDataSel <= 0;
 						end
+						2: begin
+							RegDst <= 1;
+							Jump <= 0;
+							BranchEqual <= 0;
+							MemtoReg <= 0;
+							MemWrite <= 0;
+							MemRead <= 0;
+							ALUASrc <= 0;
+							ALUBSrc <= 0;
+							RegWrite <= 1;
+							//RegDataSel <= 0;
+							ALUControl <= 9;
+							BranchNotEqual <= 0;
+							BranchBLTZ_BGTZ <= 0;
+							BranchBGEZ <= 0;
+						end
 					endcase
 					RegWriteSel <= 0;
 					JumpFlush <= 0;
@@ -612,25 +628,6 @@ module Controller(Clk,Reset);
 					BranchBGEZ <= 0;
 					BranchFlush <= 1;
 					ExtendSign <= 1;
-					RegWriteSel <= 0;
-				end
-				28: begin // MUL 
-					RegDst <= 1;
-					Jump <= 0;
-					JumpFlush <= 0;
-					BranchEqual <= 0;
-					MemtoReg <= 0;
-					MemWrite <= 0;
-					MemRead <= 0;
-					ALUASrc <= 0;
-					ALUBSrc <= 0;
-					RegWrite <= 1;
-					//RegDataSel <= 0;
-					ALUControl <= 9;
-					BranchNotEqual <= 0;
-					BranchBLTZ_BGTZ <= 0;
-					BranchBGEZ <= 0;
-					BranchFlush <= 0;
 					RegWriteSel <= 0;
 				end
 				1: begin // BGEZ & BLTZ 

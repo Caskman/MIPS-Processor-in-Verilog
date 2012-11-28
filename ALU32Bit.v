@@ -39,7 +39,8 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 	input   [3:0]   ALUControl; // control bits for ALU operation
 	input   [31:0]  A, B;	    // inputs
 
-	integer temp,i,x;
+	integer temp,x,i;
+	//reg [31:0] i;
 	reg [31:0] y;
 	reg sign;
 	output  reg [31:0]  ALUResult;	// answer
@@ -104,7 +105,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end
 			end
 			12: begin // CLO/CLZ
-				x = B;
+				//x = B;
 				temp = 32;
 				for (i = 31; i >= 0; i = i - 1) begin
 						if (A[i] == x) begin
@@ -116,11 +117,13 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			end
 			13: begin // ROTR & SRL
 				y = A;
-				for (i = B[4:0];i > 0; i = i - 1) begin
+				i = B[4:0];
+				while ( i > 0 ) begin
 					if (B[5] == 1)
 						y = {y[0],y[31:1]};
 					else
 						y = {1'b0,y[31:1]};
+					i = i - 1;
 				end
 				ALUResult <= y;
 			end
@@ -129,7 +132,7 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			14: // SLTU
 				ALUResult <= A < B;
 			5: begin // Sign Extension
-				if (B == 0) begin // Byte	
+				if (B == 0) begin // Byte
 					if (A[7]==1)
 					begin
 						ALUResult  <= {24'hffffff , A};

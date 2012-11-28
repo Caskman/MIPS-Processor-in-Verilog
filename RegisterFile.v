@@ -52,7 +52,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegWrite, Clk, ReadData1, ReadData2);
-
+	integer i;
 	/* Please fill in the implementation here... */ 
 	input [4:0] ReadRegister1,ReadRegister2,WriteRegister;
 	input [31:0] WriteData;
@@ -65,27 +65,9 @@ module RegisterFile(ReadRegister1, ReadRegister2, WriteRegister, WriteData, RegW
 	reg [31:0] Registers [0:31];
 	
 	initial begin
-		Registers[0] <= 32'h00000000;
-		Registers[8] <= 32'h00000000;
-		Registers[9] <= 32'h00000000;
-		Registers[10] <= 32'h00000000;
-		Registers[11] <= 32'h00000000;
-		Registers[12] <= 32'h00000000;
-		Registers[13] <= 32'h00000000;
-		Registers[14] <= 32'h00000000;
-		Registers[15] <= 32'h00000000;
-		Registers[16] <= 32'h00000000;
-		Registers[17] <= 32'h00000000;
-		Registers[18] <= 32'h00000000;
-		Registers[19] <= 32'h00000000;
-		Registers[20] <= 32'h00000000;
-		Registers[21] <= 32'h00000000;
-		Registers[22] <= 32'h00000000;
-		Registers[23] <= 32'h00000000;
-		Registers[24] <= 32'h00000000;
-		Registers[25] <= 32'h00000000;
-		Registers[29] <= 32'd252; // this value should point to the top of data memory, dont forget byte addressing
-		Registers[31] <= 32'b0;
+		for (i = 0; i < 32; i = i + 1) begin
+			Registers[i] = 0;
+		end
 	end
 	
 	

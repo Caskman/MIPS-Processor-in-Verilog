@@ -36,7 +36,7 @@
 module InstructionFetchUnit(Instruction, Reset, Clk,NewPC,Jump,PCNow,PCNext4,PCWrite);
 
 	/* Please fill in the implementation here... */
-	wire [31:0] PCAdderOut,PCNext,Instruction,PCOut;
+	wire [31:0] PCAdderOut,PCNext,InstructionWire,PCOut;
 	input Reset,Clk,Jump,PCWrite;
 	input [31:0] NewPC;
 	output [31:0] Instruction,PCNext4,PCNow;
@@ -44,7 +44,7 @@ module InstructionFetchUnit(Instruction, Reset, Clk,NewPC,Jump,PCNow,PCNext4,PCW
 
 	PCAdder adder(PCOut,PCAdderOut);
 	ProgramCounter PC(PCNext,PCOut,Reset,Clk,PCWrite);
-	InstructionMemory mem(PCOut,Instruction);
+	InstructionMemory mem(PCOut,InstructionWire);
 	mux_2to1_32bit JumpOrPCNext4Mux(PCNext,PCAdderOut,NewPC,Jump); 
 	// mux_2to1_32bit JumpOrBranchMux(PCNext,PCNextBeforeBranch,ALUResult,Branch);
 	// mux_2to1_32bit jumpsel(JumpIn, {PCOut[31:26],(JumpInstruction<<2)}, JumpRegister, JumpSel); 
@@ -52,6 +52,7 @@ module InstructionFetchUnit(Instruction, Reset, Clk,NewPC,Jump,PCNow,PCNext4,PCW
 
 	assign PCNow = PCOut;
 	assign PCNext4 = PCAdderOut;
+	assign Instruction = InstructionWire;
 
 endmodule
 
