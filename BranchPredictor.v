@@ -15,6 +15,7 @@ module BranchPredictor(Reset,BranchInstructExists_ID,BranchInstructExists_EX,Bra
 				BranchPattern[i] <= 0;
 			end
 			BranchHistory <= 0;
+			Prediction <= 0;
 		end
 	end
 	
