@@ -51,7 +51,37 @@ module ID_EX_REG(clk, rst,MemWrite, MemRead,RegWrite,RegWriteSel,MemtoReg,DataMe
 	reg [31:0] ReadData1_EX, ReadData2_EX;
 	reg [31:0] Instruction_EX,Extended15to0Inst_EX,PCNext4_out,PCNow_out;
 	
-always@(rst)
+// always@(rst)
+// begin
+	// if (rst == 1) begin
+		// MemWrite_EX 			<=  0;
+		// MemRead_EX 				<=  0;
+		// RegWrite_EX 			<=  0;
+		// RegWriteSel_EX 		<=  0;
+		// MemtoReg_EX 			<=  0;
+		// DataMemExtendSign_EX <=  0;
+		// BranchBLTZ_BGTZ_EX 	<=  0;
+		// BranchBGEZ_EX 			<=	 0;
+		// BranchNotEqual_EX 	<=  0;
+		// BranchEqual_EX		<=  0;
+		// RegDest_EX				<=  0;
+		// ALUASrc_EX				<=  0;
+		// BHW_EX					<=  0;
+		// ALUBSrc_EX				<=  0;
+		// ALUControl_EX			<=  0;
+		// ReadData1_EX		<=  0;
+		// ReadData2_EX		<=  0;
+		// Instruction_EX			<=  0;
+		// Extended15to0Inst_EX <=  0;
+		// PCNext4_out <= 0;
+		// BranchFlush_EX <= 0;
+		// PCNow_out <= 0;
+		// WriteRegAddress_out <= 0;
+		// Prediction_out <= 0;
+	// end
+// end
+
+always@(posedge clk)
 begin
 	if (rst == 1) begin
 		MemWrite_EX 			<=  0;
@@ -78,35 +108,32 @@ begin
 		PCNow_out <= 0;
 		WriteRegAddress_out <= 0;
 		Prediction_out <= 0;
+	end else begin
+		MemWrite_EX 			<=  MemWrite;
+		MemRead_EX 				<=  MemRead;
+		RegWrite_EX 			<=  RegWrite;
+		RegWriteSel_EX 		<=  RegWriteSel;
+		MemtoReg_EX 			<=  MemtoReg;
+		DataMemExtendSign_EX <=  DataMemExtendSign;
+		BranchBLTZ_BGTZ_EX 	<=  BranchBLTZ_BGTZ;
+		BranchBGEZ_EX 			<=	 BranchBGEZ;
+		BranchNotEqual_EX 	<=  BranchNotEqual;
+		BranchEqual_EX		<=  BranchEqual;
+		RegDest_EX				<=  RegDest;
+		ALUASrc_EX				<=  ALUASrc;
+		BHW_EX					<=  BHW;
+		ALUBSrc_EX				<=  ALUBSrc;
+		ALUControl_EX			<=  ALUControl;
+		ReadData1_EX		<=  ReadData1;
+		ReadData2_EX		<=  ReadData2;
+		Instruction_EX			<=  Instruction_ID;
+		Extended15to0Inst_EX <=  Extended15to0Inst;
+		PCNext4_out <= PCNext4_in;
+		BranchFlush_EX <= BranchFlush;
+		PCNow_out <= PCNow_in;
+		WriteRegAddress_out <= WriteRegAddress_in;
+		Prediction_out <= Prediction_in;
 	end
-end
-
-always@(posedge clk)
-begin
-   MemWrite_EX 			<=  MemWrite;
-	MemRead_EX 				<=  MemRead;
-	RegWrite_EX 			<=  RegWrite;
-	RegWriteSel_EX 		<=  RegWriteSel;
-	MemtoReg_EX 			<=  MemtoReg;
-	DataMemExtendSign_EX <=  DataMemExtendSign;
-	BranchBLTZ_BGTZ_EX 	<=  BranchBLTZ_BGTZ;
-	BranchBGEZ_EX 			<=	 BranchBGEZ;
-	BranchNotEqual_EX 	<=  BranchNotEqual;
-	BranchEqual_EX		<=  BranchEqual;
-	RegDest_EX				<=  RegDest;
-	ALUASrc_EX				<=  ALUASrc;
-	BHW_EX					<=  BHW;
-	ALUBSrc_EX				<=  ALUBSrc;
-	ALUControl_EX			<=  ALUControl;
-	ReadData1_EX		<=  ReadData1;
-	ReadData2_EX		<=  ReadData2;
-	Instruction_EX			<=  Instruction_ID;
-	Extended15to0Inst_EX <=  Extended15to0Inst;
-	PCNext4_out <= PCNext4_in;
-	BranchFlush_EX <= BranchFlush;
-	PCNow_out <= PCNow_in;
-	WriteRegAddress_out = WriteRegAddress_in;
-	Prediction_out <= Prediction_in;
 end
 	 	
 endmodule

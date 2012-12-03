@@ -1,5 +1,3 @@
-
-
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
@@ -39,7 +37,28 @@ module EX_MEM_Reg(clk,rst,MemRead_in,MemWrite_in,BHW_in,DataMemExtendSign_in,Rea
 	reg [4:0] WriteRegAddress_out;
 	reg [31:0] ReadData1_out,ReadData2_out,ALUResult_out,NextInstruct_out,Instruction_out;
 
-always@(rst)
+// always@(rst)
+// begin
+	// if (rst == 1) begin
+		// MemRead_out <= 0;
+		// MemWrite_out <= 0;
+		// BHW_out <= 0;
+		// DataMemExtendSign_out <= 0;
+		// ReadData1_out <= 0;
+		// ReadData2_out <= 0;
+		// RegWrite_out <= 0;
+		// RegDst_out <= 0;
+		// RegWriteSel_out <= 0;
+		// MemToReg_out <= 0;
+		// ALUResult_out <= 0;
+		// Zero_out <= 0;
+		// NextInstruct_out <= 0;
+		// Instruction_out <= 0;
+		// WriteRegAddress_out <= 0;
+	// end
+// end
+
+always@(posedge clk)
 begin
 	if (rst == 1) begin
 		MemRead_out <= 0;
@@ -57,26 +76,23 @@ begin
 		NextInstruct_out <= 0;
 		Instruction_out <= 0;
 		WriteRegAddress_out <= 0;
+	end else begin
+		MemRead_out <= MemRead_in;
+		MemWrite_out <= MemWrite_in;
+		BHW_out <= BHW_out;
+		DataMemExtendSign_out <= DataMemExtendSign_in;
+		ReadData1_out <= ReadData1_in;
+		ReadData2_out <= ReadData2_in;
+		RegWrite_out <= RegWrite_in;
+		RegDst_out <= RegDst_in;
+		RegWriteSel_out <= RegWriteSel_in;
+		MemToReg_out <= MemToReg_in;
+		ALUResult_out <= ALUResult_in;
+		Zero_out <= Zero_in;
+		NextInstruct_out <= NextInstruct_in;
+		Instruction_out <= Instruction_in;
+		WriteRegAddress_out <= WriteRegAddress_in;
 	end
-end
-
-always@(posedge clk)
-begin
-	MemRead_out <= MemRead_in;
-	MemWrite_out <= MemWrite_in;
-	BHW_out <= BHW_out;
-	DataMemExtendSign_out <= DataMemExtendSign_in;
-	ReadData1_out <= ReadData1_in;
-	ReadData2_out <= ReadData2_in;
-	RegWrite_out <= RegWrite_in;
-	RegDst_out <= RegDst_in;
-	RegWriteSel_out <= RegWriteSel_in;
-	MemToReg_out <= MemToReg_in;
-	ALUResult_out <= ALUResult_in;
-	Zero_out <= Zero_in;
-	NextInstruct_out <= NextInstruct_in;
-	Instruction_out <= Instruction_in;
-	WriteRegAddress_out <= WriteRegAddress_in;
 end
 	 
 

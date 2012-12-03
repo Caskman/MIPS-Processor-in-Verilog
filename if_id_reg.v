@@ -28,33 +28,49 @@ module if_id_reg(clk,rst,Write,instruction_in,PCNow_in,PCNext4_in,instruction_ou
 	 reg [31:0] instruction_outB, PCNext4_outB,PCNow_outB;
 	
 	
-	always@(rst)
+	// always@(rst)
+	// begin
+		// if (rst == 1) begin
+			// instruction_out <= 32'b0;
+			// PCNext4_out <= 32'b0;
+			// PCNow_out <= 0;
+		// end else if (rst == 0) begin
+		// instruction_out <= instruction_outB;
+		// PCNext4_out <= PCNext4_outB;
+		// PCNow_out <= PCNow_outB;
+		// end
+	// end
+
+	always@(clk)
 	begin
-		if (rst == 1) begin
+		if (rst) begin
 			instruction_out <= 32'b0;
 			PCNext4_out <= 32'b0;
 			PCNow_out <= 0;
-		end else if (rst == 0) begin
-		instruction_out <= instruction_outB;
-		PCNext4_out <= PCNext4_outB;
-		PCNow_out <= PCNow_outB;
+		end else begin
+			instruction_out <= instruction_outB;
+			PCNext4_out <= PCNext4_outB;
+			PCNow_out <= PCNow_outB;
+			if (clk) begin
+				if (Write) begin
+					instruction_out <= instruction_in;
+					PCNext4_out <= PCNext4_in;
+					PCNow_out <= PCNow_in;
+				end
+			end else begin
+				instruction_outB <= instruction_in;
+				PCNext4_outB <= PCNext4_in;
+				PCNow_outB <= PCNow_in;
+			end
 		end
-	end
-
-	always@(posedge clk)
-	begin
-		if (Write) begin
-			instruction_out <= instruction_in;
-			PCNext4_out <= PCNext4_in;
-			PCNow_out <= PCNow_in;
-		end
+		
 	end
 	 
-	always@(negedge clk) begin
-		instruction_outB <= instruction_in;
-		PCNext4_outB <= PCNext4_in;
-		PCNow_outB <= PCNow_in;
-	end
+	// always@(negedge clk) begin
+		// instruction_outB <= instruction_in;
+		// PCNext4_outB <= PCNext4_in;
+		// PCNow_outB <= PCNow_in;
+	// end
 	 
 	 
 

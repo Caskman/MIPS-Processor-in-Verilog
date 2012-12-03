@@ -42,7 +42,24 @@ module MEM_WB_REG(Clk, Reset,ALUResult_MEM,Instruction_MEM,ReadDataFromMem_MEM, 
 	 reg [4:0] WriteRegAddress_out;
 	 reg [31:0] ReadData1_WB,NextInstruct_out;	
 	 
-always@(Reset)
+// always@(Reset)
+// begin
+	// if (Reset == 1) begin
+		// ALUResult_WB			<=  0;
+		// Instruction_WB			<=  0;
+		// ReadDataFromMem_WB   <=  0;
+		// MemtoReg_WB				<=  0;
+		// RegWrite_WB				<=  0;
+		// RegWriteSel_WB			<=  0;
+		// RegDst_WB				<=  0;
+		// Zero_WB					<=  0;
+		// ReadData1_WB			<=  0;
+		// NextInstruct_out <= 0;
+		// WriteRegAddress_out <= 0;
+	// end
+// end
+
+always@(posedge Clk)
 begin
 	if (Reset == 1) begin
 		ALUResult_WB			<=  0;
@@ -56,22 +73,19 @@ begin
 		ReadData1_WB			<=  0;
 		NextInstruct_out <= 0;
 		WriteRegAddress_out <= 0;
+	end else begin
+		ALUResult_WB			<=  ALUResult_MEM;
+		Instruction_WB			<=  Instruction_MEM;
+		ReadDataFromMem_WB   <=  ReadDataFromMem_MEM;
+		MemtoReg_WB				<=  MemtoReg_MEM;
+		RegWrite_WB				<=  RegWrite_MEM;
+		RegWriteSel_WB			<=  RegWriteSel_MEM;
+	   RegDst_WB				<=  RegDst_MEM;
+		Zero_WB					<=  Zero_MEM;
+		ReadData1_WB			<=  ReadData1_MEM;
+		NextInstruct_out <= NextInstruct_in;
+		WriteRegAddress_out <= WriteRegAddress_in;
 	end
-end
-
-always@(posedge Clk)
-begin
-	ALUResult_WB			<=  ALUResult_MEM;
-	Instruction_WB			<=  Instruction_MEM;
-	ReadDataFromMem_WB   <=  ReadDataFromMem_MEM;
-	MemtoReg_WB				<=  MemtoReg_MEM;
-	RegWrite_WB				<=  RegWrite_MEM;
-	RegWriteSel_WB			<=  RegWriteSel_MEM;
-   RegDst_WB				<=  RegDst_MEM;
-	Zero_WB					<=  Zero_MEM;
-	ReadData1_WB			<=  ReadData1_MEM;
-	NextInstruct_out <= NextInstruct_in;
-	WriteRegAddress_out <= WriteRegAddress_in;
 end
 
 endmodule
