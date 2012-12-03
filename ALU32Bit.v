@@ -39,10 +39,8 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 	input   [3:0]   ALUControl; // control bits for ALU operation
 	input   [31:0]  A, B;	    // inputs
 
-	integer temp,x,i;
+	integer temp,i;
 	//reg [31:0] i;
-	reg [31:0] y;
-	reg sign;
 	output  reg [31:0]  ALUResult;	// answer
 	output  reg     Zero;	    // Zero=1 if ALUResult == 0
 
@@ -107,25 +105,25 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 			12: begin // CLO/CLZ
 				//x = B;
 				temp = 32;
-				for (i = 31; i >= 0; i = i - 1) begin
-						if (A[i] == x) begin
-							temp = 31 - i;
-							i = -2;
-						end
-				end
+				// for (i = 31; i >= 0; i = i - 1) begin
+						// if (A[i] == x) begin
+							// temp = 31 - i;
+							// i = -2;
+						// end
+				// end
 				ALUResult <= temp;
 			end
 			13: begin // ROTR & SRL
-				y = A;
-				i = B[4:0];
-				while ( i > 0 ) begin
-					if (B[5] == 1)
-						y = {y[0],y[31:1]};
-					else
-						y = {1'b0,y[31:1]};
-					i = i - 1;
-				end
-				ALUResult <= y;
+				// y = A;
+				// i = B[4:0];
+				// while ( i > 0 ) begin
+					// if (B[5] == 1)
+						// y = {y[0],y[31:1]};
+					// else
+						// y = {1'b0,y[31:1]};
+					// i = i - 1;
+				// end
+				// ALUResult <= y;
 			end
 			4: // XOR
 				ALUResult <= A^B;
@@ -153,11 +151,11 @@ module ALU32Bit(ALUControl, A, B, ALUResult, Zero);
 				end					
 			end
 			15: begin // SRA
-				y = A;
-				for (i = B; i > 0; i = i - 1) begin
-					y = {y[31],y[31:1]};
-				end
-				ALUResult <= y;
+				// y = A;
+				// for (i = B; i > 0; i = i - 1) begin
+					// y = {y[31],y[31:1]};
+				// end
+				// ALUResult <= y;
 			end
 		endcase
 	end
