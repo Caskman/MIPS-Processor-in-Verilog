@@ -1,6 +1,7 @@
+#####MIPS Processor in Verilog#####
 
-ECE 369 Project
+Building a simple pipelined processor in Verilog (ugh) with data forwarding and branch prediction.  
 
-Building a single stage MIPS processor in Verilog.  THEN upgrading it to a pipelined processor with zero synthesization success.
+Couldn't get it to synthesize unfortunately :( (why do we use Verilog for this stuff???)
 
 
