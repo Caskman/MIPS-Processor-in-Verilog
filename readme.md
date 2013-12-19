@@ -1,4 +1,4 @@
-#####MIPS Processor in Verilog#####
+##MIPS Processor in Verilog##
 
 Building a simple pipelined processor in Verilog (ugh) with data forwarding and branch prediction.  
 
